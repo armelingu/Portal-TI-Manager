@@ -1,8 +1,0 @@
-2025-04-10 13:40:47,620 INFO: Portal TI Manager - Iniciando aplicacao [in d:\FormsHBR\PortalHBR\app.py:53]
-2025-04-10 13:40:47,688 INFO: Banco de dados inicializado [in d:\FormsHBR\PortalHBR\app.py:458]
-2025-04-10 13:40:48,742 INFO: Portal TI Manager - Iniciando aplicacao [in d:\FormsHBR\PortalHBR\app.py:53]
-2025-04-10 13:40:48,837 INFO: Banco de dados inicializado [in d:\FormsHBR\PortalHBR\app.py:458]
-2025-04-10 13:49:50,425 INFO: Nova máquina cadastrada: Gustavo Armelin (10.0.225.1) [in d:\FormsHBR\PortalHBR\app.py:175]
-2025-04-10 13:49:55,324 INFO: Máquina excluída: ID 18 - Gustavo Armelin [in d:\FormsHBR\PortalHBR\app.py:297]
-2025-04-10 13:51:39,667 INFO: Nova máquina cadastrada: Gustavo Armelin (10.0.225.1) [in d:\FormsHBR\PortalHBR\app.py:175]
-2025-04-10 13:52:45,848 INFO: Máquina atualizada: Gustavo Armelin (10.0.225.1) [in d:\FormsHBR\PortalHBR\app.py:275]
