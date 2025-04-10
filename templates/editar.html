@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ titulo }}</h2>
+    
+    <form method="POST" class="needs-validation" novalidate>
+        {{ form.csrf_token }}
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.nome.label(class="form-label") }}
+                    {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else "")) }}
+                    {% if form.nome.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.nome.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.departamento.label(class="form-label") }}
+                    {{ form.departamento(class="form-select" + (" is-invalid" if form.departamento.errors else "")) }}
+                    {% if form.departamento.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.departamento.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.endereco_ip.label(class="form-label") }}
+                    {{ form.endereco_ip(class="form-control" + (" is-invalid" if form.endereco_ip.errors else "")) }}
+                    {% if form.endereco_ip.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.endereco_ip.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.mac_adress.label(class="form-label") }}
+                    {{ form.mac_adress(class="form-control" + (" is-invalid" if form.mac_adress.errors else "")) }}
+                    {% if form.mac_adress.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.mac_adress.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ form.hostname.label(class="form-label") }}
+                    {{ form.hostname(class="form-control" + (" is-invalid" if form.hostname.errors else "")) }}
+                    {% if form.hostname.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.hostname.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ form.memoria_ram.label(class="form-label") }}
+                    {{ form.memoria_ram(class="form-control" + (" is-invalid" if form.memoria_ram.errors else "")) }}
+                    {% if form.memoria_ram.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.memoria_ram.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ form.ssd.label(class="form-label") }}
+                    {{ form.ssd(class="form-control" + (" is-invalid" if form.ssd.errors else "")) }}
+                    {% if form.ssd.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.ssd.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ form.ramal.label(class="form-label") }}
+                    {{ form.ramal(class="form-control" + (" is-invalid" if form.ramal.errors else "")) }}
+                    {% if form.ramal.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.ramal.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <a href="{{ url_for('relatorio') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

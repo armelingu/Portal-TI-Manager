@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bg-white p-5 rounded-4 shadow-sm border-top border-5 border-warning">
+                <h1 class="text-center mb-4">{{ titulo }}</h1>
+
+                <form method="POST" class="row g-3 needs-validation" novalidate>
+                    {{ form.csrf_token }} <!-- ultima alteração aqui-->
+
+                    <div class="col-md-6">
+                        <div class="form-group"> <!-- COMEÇO: campo nome -->
+                            {{ form.nome.label(class="form-label fw-bold") }}
+                            {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else ""), placeholder="Nome da máquina") }}
+                            {% if form.nome.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.nome.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo nome -->                  
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo departamento -->
+                        <div class="form-group">
+                            {{ form.departamento.label(class="form-label fw-bold") }}
+                            {{ form.departamento(class="form-control" + (" is-invalid" if form.departamento.errors else "")) }}
+                            {% if form.departamento.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.endereco_ip.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo departamento -->
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo endereço IP -->
+                        <div class="form-group">
+                            {{ form.endereco_ip.label(class="form-label fw-bold") }}
+                            {{ form.endereco_ip(class="form-control" + (" is-invalid" if form.endereco_ip.errors else ""), placeholder="Ex.: 10.0.225.50") }}
+                            {% if form.endereco_ip.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.endereco_ip.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo endereço IP -->
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo mac_adress -->
+                        <div class="form-group">
+                            {{ form.mac_adress.label(class="form-label fw-bold") }}
+                            {{ form.mac_adress(class="form-control" + (" is-invalid" if form.mac_adress.errors else ""), placeholder="Ex.: 00:1A:2B:3C:4D:53") }}
+                            {% if form.mac_adress.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.mac_adress.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo mac_adress -->
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo hostname -->
+                        <div class="form-group">
+                            {{ form.hostname.label(class="form-label fw-bold") }}
+                            {{ form.hostname(class="form-control" + (" is-invalid" if form.hostname.errors else ""), placeholder="Nome do host") }}
+                            {% if form.hostname.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.hostname.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo hostname -->
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo memoria_ram -->
+                        <div class="form-group">
+                            {{ form.memoria_ram.label(class="form-label fw-bold") }}
+                            {{ form.memoria_ram(class="form-control" + (" is-invalid" if form.memoria_ram.errors else ""), placeholder="Ex.: 8") }}
+                            {% if form.memoria_ram.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.memoria_ram.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo memoria_ram -->
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo ssd -->
+                        <div class="form-group">
+                            {{ form.ssd.label(class="form-label fw-bold") }}
+                            {{ form.ssd(class="form-control" + (" is-invalid" if form.ssd.errors else ""), placeholder="Ex.: 256") }}
+                            {% if form.ssd.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.ssd.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo ssd -->
+            
+                    <div class="col-md-6"> <!-- COMEÇO: campo ramal -->
+                        <div class="form-group">
+                            {{ form.ramal.label(class="form-label fw-bold") }}
+                            {{ form.ramal(class="form-control" + (" is-invalid" if form.ramal.errors else ""), placeholder="Ex.: 8000") }}
+                            {% if form.ramal.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.ramal.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo ramal -->
+            
+            <div class="col-12 text-center mt-4">
+                <button type="submit" class="btn btn-warning px-4 py-2 me-2" id="btnCadastrar">
+                    <i class="fas fa-save me-2"></i> Cadastrar
+                </button>                
+                <a href="{{ url_for('relatorio') }}" class="btn btn-outline-secondary px-4 py-2">
+                    <i class="fas fa-times me-2"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #FEA30B;
+    --secondary-color: #343a40;
+    --light-bg: #f8f9fa;
+    --hover-color: #e09000;
+    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+.form-container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    box-shadow: var(--box-shadow);
+    border-top: 5px solid var(--primary-color);
+}
+
+.form-title {
+    color: var(--secondary-color);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.form-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 4px;
+    width: 60px;
+    background-color: var(--primary-color);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-color);
+    border-color: var(--hover-color);
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

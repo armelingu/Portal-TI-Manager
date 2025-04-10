@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-container text-center">
+    <div class="error-page">
+        <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+        <h1 class="display-1 fw-bold">{{ error_code }}</h1>
+        <h2 class="mb-4">{{ message }}</h2>
+        <p class="text-muted mb-4">Desculpe, ocorreu um erro ao processar sua solicitação.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-home me-2"></i>Voltar para a Página Inicial
+        </a>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 40px;
+}
+
+.error-page i {
+    color: var(--primary-color);
+}
+
+.error-page h1 {
+    color: var(--secondary-color);
+    font-size: 6rem;
+    margin: 20px 0;
+}
+
+.error-page h2 {
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %} 

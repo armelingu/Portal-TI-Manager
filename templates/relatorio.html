@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" name="search" class="form-control border-start-0" placeholder="Pesquisar por nome, departamento, IP..." value="{{ search }}">
+        </div>
+    </div>
+
+    <div class="col-md-6 text-end">
+        <a href="{{ url_for('exportar_csv') }}" class="btn btn-success me-2">
+            <i class="fas fa-file-excel me-2"></i> Exportar CSV
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-warning">
+            <i class="fas fa-plus-circle me-2"></i> Novo Cadastro
+        </a>
+    </div>
+</div>
+    
+    {% if registros.items %}
+    <div class="table-responsive rounded-4 shadow-sm border">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome</th>
+                    <th>Departamento</th>
+                    <th>IP</th>
+                    <th>MAC</th>
+                    <th>Hostname</th>
+                    <th>RAM</th>
+                    <th>SSD</th>
+                    <th>Ramal</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros.items %}
+                <tr>
+                    <td>{{ registro.nome }}</td>
+                    <td>{{ registro.departamento }}</td>
+                    <td>{{ registro.endereco_ip }}</td>
+                    <td>{{ registro.mac_adress }}</td>
+                    <td>{{ registro.hostname }}</td>
+                    <td>{{ registro.memoria_ram }} GB</td>
+                    <td>{{ registro.ssd }} GB</td>
+                    <td>{{ registro.ramal }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('editar', id=registro.id) }}" class="btn btn-sm btn-warning me-2" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="confirmarExclusao({{ registro.id }})" class="btn btn-sm btn-danger" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>    
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4">
+        <div class="mb-3 mb-md-0 text-muted small">
+            Mostrando <strong>{{ registros.items|length }}</strong> de <strong>{{ registros.total }}</strong> registros
+        </div>
+    
+        <nav aria-label="Paginação de registros">
+            {{ pagination.links | safe }}
+        </nav>
+    </div>
+    
+    {% else %}
+    <div class="text-center my-5">
+        <i class="fas fa-database fa-3x mb-3 text-secondary"></i>
+        <h4 class="mb-3">Nenhum registro encontrado</h4>
+        <p class="text-muted">Ainda não há máquinas cadastradas. Clique abaixo para adicionar a primeira!</p>
+        <a href="{{ url_for('index') }}" class="btn btn-warning mt-3">
+            <i class="fas fa-plus-circle me-2"></i> Novo Cadastro
+        </a>
+    </div>    
+    {% endif %}
+</div>
+
+<style>
+:root {
+    --primary-color: #FEA30B;
+    --secondary-color: #343a40;
+    --light-bg: #f8f9fa;
+    --hover-color: #e09000;
+    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+.content-container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    box-shadow: var(--box-shadow);
+    border-top: 5px solid var(--primary-color);
+}
+
+.page-title {
+    color: var(--secondary-color);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.page-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 4px;
+    width: 60px;
+    background-color: var(--primary-color);
+}
+
+.search-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    color: #6c757d;
+}
+
+.search-input {
+    padding-left: 40px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(254, 163, 11, 0.25);
+    border-color: var(--primary-color);
+}
+
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.table thead {
+    background-color: var(--light-bg);
+}
+
+.table thead th {
+    font-weight: bold;
+    color: var(--secondary-color);
+    cursor: pointer;
+}
+
+.table thead th:hover {
+    background-color: #e9ecef;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(254, 163, 11, 0.05);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.status-bar {
+    margin-top: 20px;
+    background-color: var(--light-bg);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.no-data {
+    padding: 40px;
+    text-align: center;
+    color: #6c757d;
+}
+</style>
+{% endblock %}
