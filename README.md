@@ -14,6 +14,7 @@ Sistema web de cadastro, gestão e monitoramento de ativos de TI. Desenvolvido e
 - **Systemd**
 - **MySQL/MariaDB**
 
+---
 
 ## 🔢 Pré-Requisitos
 
@@ -23,6 +24,7 @@ Sistema web de cadastro, gestão e monitoramento de ativos de TI. Desenvolvido e
 - MySQL ou MariaDB instalado
 - Permissões de sudo/root
 
+---
 
 ## 📚 Instalação e Configuração
 
@@ -32,20 +34,20 @@ Sistema web de cadastro, gestão e monitoramento de ativos de TI. Desenvolvido e
 sudo apt update && sudo apt upgrade -y
 ```
 
-### 2. Instalação dos pacotes necessários
+### 2. Instalação dos Pacotes Necessários
 
 ```bash
 sudo apt install python3 python3-pip python3-venv apache2 -y
 ```
 
-### 3. Clonar o repositório
+### 3. Clonar o Repositório
 
 ```bash
 cd /var/www/
 sudo git clone https://github.com/<SEU_USUARIO>/<SEU_REPOSITORIO>.git ti-manager
 ```
 
-### 4. Criar ambiente virtual e instalar dependências
+### 4. Criar Ambiente Virtual e Instalar Dependências
 
 ```bash
 cd /var/www/ti-manager
@@ -54,27 +56,30 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. Configurar permissões
+### 5. Configurar Permissões
 
 ```bash
 sudo chown -R www-data:www-data /var/www/ti-manager
 ```
 
+---
 
 ## 🛠️ Configuração do Apache
 
-1. Ativar os módulos:
+### Ativar os Módulos Necessários
 
 ```bash
 sudo a2enmod proxy proxy_http
 sudo systemctl restart apache2
 ```
 
-2. Criar VirtualHost:
+### Criar VirtualHost
 
 ```bash
 sudo nano /etc/apache2/sites-available/ti-manager.conf
 ```
+
+Conteúdo do arquivo:
 
 ```apache
 <VirtualHost *:80>
@@ -89,21 +94,24 @@ sudo nano /etc/apache2/sites-available/ti-manager.conf
 </VirtualHost>
 ```
 
-3. Ativar o site:
+### Ativar o Site e Reiniciar o Apache
 
 ```bash
 sudo a2ensite ti-manager.conf
 sudo systemctl reload apache2
 ```
 
+---
 
 ## 🛠️ Configuração do Systemd
 
-1. Criar serviço:
+### Criar Serviço Systemd
 
 ```bash
 sudo nano /etc/systemd/system/ti-manager.service
 ```
+
+Conteúdo do arquivo:
 
 ```ini
 [Unit]
@@ -121,7 +129,7 @@ ExecStart=/var/www/ti-manager/venv/bin/python3 app.py
 WantedBy=multi-user.target
 ```
 
-2. Ativar o serviço:
+### Ativar o Serviço
 
 ```bash
 sudo systemctl daemon-reload
@@ -129,20 +137,24 @@ sudo systemctl start ti-manager
 sudo systemctl enable ti-manager
 ```
 
+---
 
 ## 🕹️ Acesso ao Sistema
 
 - URL: `http://<SEU_DOMINIO_OU_IP>/`
-- Liberar Apache no firewall:
+- Liberar acesso no firewall:
 
 ```bash
 sudo ufw allow 'Apache Full'
 ```
 
+---
 
 ## 🜍 Telas do Sistema
 
 ### Tela de Cadastro
+
+- Formulário vazio:
 
 ![Cadastro vazio](screenshots/cadastro_vazio.png)
 
@@ -152,30 +164,35 @@ sudo ufw allow 'Apache Full'
 
 ![Relatório vazio](screenshots/relatorio_vazio.png)
 
-- Com registros:
+- Com registros preenchidos:
 
 ![Relatório preenchido](screenshots/relatorio_preenchido.png)
 
 ### Tela de Estatísticas
 
+- Com dados preenchidos:
+
 ![Estatísticas preenchidas](screenshots/estatisticas_preenchido.png)
 
 ### Tela de Edição
 
+- Formulário preenchido:
+
 ![Edição preenchida](screenshots/edicao_preenchido.png)
 
+---
 
 ## 📖 Personalização
 
-- Alterar nome do projeto e domínio no Apache.
-- Atualizar configurações no app.py conforme necessidade.
+- Atualizar nome do projeto nos arquivos de configuração.
 - Personalizar identidade visual nos templates HTML.
+- Ajustar domínio e IP conforme necessidade.
 
+---
 
 ## 🚀 Status Atual
 
-Sistema operacional, funcional e pronto para utilização em ambientes de produção locais (on-premise).
-
+Sistema em pleno funcionamento para ambientes locais (on-premise), pronto para uso em produção.
 
 ---
 
@@ -196,5 +213,7 @@ screenshots/*.tmp
 *.log
 ```
 
-> **Nota:** O .gitignore impede o envio de arquivos sensíveis, pastas de ambiente virtual e arquivos temporários para o repositório.
+---
+
+**Desenvolvido para ser adaptável para qualquer organização.**
 
