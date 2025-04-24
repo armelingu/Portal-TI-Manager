@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Editar Perfil</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('editar_perfil') }}" method="POST" enctype="multipart/form-data">
+                        <div class="text-center mb-4">
+                            <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar Atual" class="rounded-circle" width="100" height="100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="apelido" class="form-label">Apelido</label>
+                            <input type="text" class="form-control" id="apelido" name="apelido" value="{{ current_user.apelido }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="setor" class="form-label">Setor</label>
+                            <input type="text" class="form-control" id="setor" name="setor" value="{{ current_user.setor }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cargo" class="form-label">Cargo</label>
+                            <input type="text" class="form-control" id="cargo" name="cargo" value="{{ current_user.cargo }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="avatar" class="form-label">Alterar Foto de Perfil</label>
+                            <input type="file" class="form-control" id="avatar" name="avatar">
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('perfil') }}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

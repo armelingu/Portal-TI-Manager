@@ -1,0 +1,6 @@
+instance/
+__pycache__/
+*.pyc
+.env
+*.log
+banco_de_dados.db

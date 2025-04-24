@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Gerenciar Usuários</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow mb-5">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Cadastrar Novo Usuário</h5>
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Usuário (Login)</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="nome" class="form-label">Nome Completo</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="setor" class="form-label">Setor</label>
+                        <input type="text" class="form-control" id="setor" name="setor">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cargo" class="form-label">Cargo</label>
+                        <input type="text" class="form-control" id="cargo" name="cargo">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="apelido" class="form-label">Apelido</label>
+                        <input type="text" class="form-control" id="apelido" name="apelido">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="is_admin" class="form-label">Administrador?</label>
+                        <select class="form-select" id="is_admin" name="is_admin" required>
+                            <option value="0" selected>Não</option>
+                            <option value="1">Sim</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning w-100">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <input type="text" class="form-control" id="campoBusca" placeholder="Buscar usuário por nome ou e-mail..." value="{{ request.args.get('busca', '') }}">
+        </div>
+    </div>
+
+    <h4 class="mb-3">Usuários Cadastrados</h4>
+    <table id="tabelaUsuarios" class="table table-striped shadow">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Usuário</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Administrador</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.username }}</td>
+                <td>{{ usuario.nome }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                    {% if usuario.is_admin %}
+                        <span class="badge bg-danger">Administrador</span>
+                    {% else %}
+                        <span class="badge bg-primary">Usuário</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-warning me-2">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <button onclick="confirmarExclusao({{ usuario.id }})" class="btn btn-sm btn-danger me-2">
+                        <i class="fas fa-trash-alt"></i> Excluir
+                    </button>
+                    <button onclick="confirmarResetarSenha({{ usuario.id }})" class="btn btn-sm btn-info">
+                        <i class="fas fa-key"></i> Resetar Senha
+                    </button>                    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- SweetAlert2 para confirmar exclusão e reset de senha -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarExclusao(id) {
+        Swal.fire({
+            title: 'Tem certeza?',
+            text: "Você não poderá reverter isso!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/excluir_usuario/' + id;
+            }
+        });
+    }
+
+    function confirmarResetarSenha(id) {
+    Swal.fire({
+        title: 'Resetar senha?',
+        text: "A nova senha será igual ao login do usuário.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sim, resetar!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/resetar_senha_usuario/${id}`;
+        }
+    });
+}
+</script>
+{% endblock %}

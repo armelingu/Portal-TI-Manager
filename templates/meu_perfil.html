@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Meu Perfil</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="rounded-circle mb-4" width="120" height="120">
+                    <h4 class="mb-3">{{ current_user.nome }}</h4>
+                    <p class="mb-1"><strong>Apelido:</strong> {{ current_user.apelido }}</p>
+                    <p class="mb-1"><strong>Username:</strong> {{ current_user.username }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ current_user.email }}</p>
+                    <p class="mb-1"><strong>Setor:</strong> {{ current_user.setor }}</p>
+                    <p class="mb-1"><strong>Cargo:</strong> {{ current_user.cargo }}</p>
+                    <p class="mb-1"><strong>Data de Registro:</strong> {{ current_user.data_registro.strftime('%d/%m/%Y') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
