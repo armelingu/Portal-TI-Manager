@@ -182,19 +182,19 @@ sudo ufw allow 'Apache Full'
 
 ### Tela de Cadastro
 
-![Cadastro vazio](screenshots/cadastro_vazio.png)
+![Cadastro vazio](public\screenshots\cadastro_vazio.png)
 
 ### Tela de Relatório
 
-![Relatório preenchido](screenshots/relatorio_preenchido.png)
+![Relatório preenchido](public/screenshots/relatorio_preenchido.png)
 
 ### Tela de Estatísticas
 
-![Estatísticas](screenshots/estatisticas_preenchido.png)
+![Estatísticas](public/screenshots/estatisticas_preenchido.png)
 
-### Tela de Logs de Auditoria
+### Tela de Edição
 
-![Auditoria](screenshots/logs_auditoria.png)
+![Auditoria](public/screenshots/edicao_preenchido.png)
 
 ---
 
