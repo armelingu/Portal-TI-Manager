@@ -4,3 +4,4 @@ __pycache__/
 .env
 *.log
 banco_de_dados.db
+zip

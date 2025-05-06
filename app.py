@@ -166,7 +166,7 @@ def registrar_log(acao, detalhes=None):
 # ------------------------------ TÉRMINO: Função para registrar logs de auditoria  -------------------------
 #
 # ------------------------------ COMEÇO: Validadores personalizados  ---------------------------------------
-def validate_hostname(form, field):
+def validate_hostname_existente(form, field):
     if len(field.data) < 3:
         raise ValidationError('O hostname deve ter pelo menos 3 caracteres.')
     
@@ -221,7 +221,7 @@ class MaquinaForm(FlaskForm):
     ])
     hostname = StringField('Hostname', validators=[
         DataRequired(message="Hostname é obrigatório"),
-        validate_hostname
+        validate_hostname_existente #inserção do validate
     ])
     memoria_ram = IntegerField('Memória RAM (GB)', validators=[
         DataRequired(message="Memória RAM é obrigatória")
@@ -231,6 +231,10 @@ class MaquinaForm(FlaskForm):
     ])
     ramal = IntegerField('Ramal', validators=[
         DataRequired(message="O ramal é obrigatório")
+    ])
+    anydesk = IntegerField('Anydesk', validators=[
+        DataRequired(message="Anydesk é obrigatório"),
+        validate_anydesk_existente #campo anydesk
     ])
     
     def __init__(self, *args, registro_id=None, **kwargs):
