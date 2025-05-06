@@ -191,6 +191,18 @@ def validate_anydesk_existente(form, field):
 #
 #  ------------------------------ COMEÇO: Formulário de cadastro/edição ------------------------------------
 class MaquinaForm(FlaskForm):
+    #campo base
+    base = SelectField('Base', validators=[DataRequired(message="Escolha a base...")], 
+                             choices=[
+                                 ('SP', 'Matriz'),
+                                 ('SC', 'Florianópolis'),
+                                 ('RJ', 'Rio de Janeiro'),
+                                 ('BA', 'Salvador')
+                                 ('MG', 'Belo Horizonte'),
+                                 ('PE', 'Recife')
+                                 ('CE', 'Fortaleza'),
+                                 ('GO', 'Goiânia')
+                             ])
     nome = StringField('Nome da Máquina', validators=[
         DataRequired(message="Nome é obrigatório"),
         Length(min=2, max=100, message="Nome deve ter entre 2 e 100 caracteres")
