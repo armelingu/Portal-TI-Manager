@@ -75,14 +75,16 @@ class Registro(db.Model):
     __tablename__ = 'registros'
     
     id = db.Column(db.Integer, primary_key=True)
+    base = db.column(db.String(100), nullable=False, index=True) #dados das bases 06.05
     nome = db.Column(db.String(100), nullable=False, index=True)
     departamento = db.Column(db.String(100), nullable=False, index=True)
     endereco_ip = db.Column(db.String(20), nullable=False, unique=True, index=True)
     mac_adress = db.Column(db.String(20), nullable=False, unique=True, index=True)
     hostname = db.Column(db.String(100), nullable=False, index=True)
     memoria_ram = db.Column(db.Integer, nullable=False)
-    ssd = db.Column(db.Integer, nullable=False) #substituir pelo campo anydesk
-    ramal = db.Column(db.Integer, nullable=False) #campo ramal
+    ssd = db.Column(db.Integer, nullable=False) 
+    ramal = db.Column(db.Integer, nullable=False) #dados de ramal
+    anydesk = db.column(db.String(20), nullable=False, Unique=True, index=True) #dados de anydesk! 06.05
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
     ultima_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -92,6 +94,7 @@ class Registro(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'base': self.id, #dados das bases
             'nome': self.nome,
             'departamento': self.departamento,
             'endereco_ip': self.endereco_ip,
@@ -99,7 +102,8 @@ class Registro(db.Model):
             'hostname': self.hostname,
             'memoria_ram': self.memoria_ram,
             'ssd': self.ssd,
-            'ramal': self.ramal, #campo ramal 
+            'ramal': self.ramal, #dados de ramal 
+            'anydesk': self.anydesk, #dados de anydesk
             'data_cadastro': self.data_cadastro.strftime('%d/%m/%Y %H:%M'),
             'ultima_atualizacao': self.ultima_atualizacao.strftime('%d/%m/%Y %H:%M')
         }
@@ -176,6 +180,13 @@ def validate_ip_existente(form, field):
 def validate_mac_existente(form, field):
     if Registro.query.filter(Registro.mac_adress == field.data, Registro.id != getattr(form, 'id', None)).first():
         raise ValidationError('Este MAC Address já está em uso.')
+
+#Validaçõa de código de anydesk no preenchimento dos dados   
+def validate_anydesk_existente(form, field):
+    if Registro.query.filter(Registro.anydesk == field.data, Registro.id != getattr(form, 'id', None)).first():
+        raise ValidationError('Este anydesk já está em uso.')
+                             
+
 # ------------------------------ TÉRMINO: Validadores personalizados  --------------------------------------
 #
 #  ------------------------------ COMEÇO: Formulário de cadastro/edição ------------------------------------
@@ -351,7 +362,7 @@ def editar(id):
             registro.ramal = form.ramal.data
             
             db.session.commit()
-            registrar_log('Edição de máquina', detalhes=f'Máquina: {registro.nome}, IP: {registro.endereco_ip}') #logs
+            registrar_log('Edição de máquina', detalhes=f'Máquina: {registro.nome}, IP: {registro.endereco_ip}') #logs  
             app.logger.info(f'Máquina atualizada: {registro.nome} ({registro.endereco_ip})')
             flash('Máquina atualizada com sucesso!', 'success')
             return redirect(url_for('relatorio'))
