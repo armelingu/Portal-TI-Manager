@@ -222,5 +222,5 @@ screenshots/*.tmp
 
 ---
 
-**Desenvolvido com ❤️ por Seu Nome ou Time de TI**  
+**Desenvolvido com ❤️ por Gustavo Armelin**  
 © 2025 — Portal TI Manager | Todos os direitos reservados.
