@@ -75,7 +75,7 @@ class Registro(db.Model):
     __tablename__ = 'registros'
     
     id = db.Column(db.Integer, primary_key=True)
-    base = db.column(db.String(100), nullable=False, index=True) #dados das bases 06.05
+    base = db.Column(db.String(100), nullable=False, index=True) #dados das bases 06.05
     nome = db.Column(db.String(100), nullable=False, index=True)
     departamento = db.Column(db.String(100), nullable=False, index=True)
     endereco_ip = db.Column(db.String(20), nullable=False, unique=True, index=True)
@@ -84,7 +84,7 @@ class Registro(db.Model):
     memoria_ram = db.Column(db.Integer, nullable=False)
     ssd = db.Column(db.Integer, nullable=False) 
     ramal = db.Column(db.Integer, nullable=False) #dados de ramal
-    anydesk = db.column(db.String(20), nullable=False, Unique=True, index=True) #dados de anydesk! 06.05
+    anydesk  = db.Column(db.String(20), nullable=False, unique=True, index=True) #dados de anydesk! 06.05
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
     ultima_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -197,9 +197,9 @@ class MaquinaForm(FlaskForm):
                                  ('SP', 'Matriz'),
                                  ('SC', 'Florianópolis'),
                                  ('RJ', 'Rio de Janeiro'),
-                                 ('BA', 'Salvador')
+                                 ('BA', 'Salvador'),
                                  ('MG', 'Belo Horizonte'),
-                                 ('PE', 'Recife')
+                                 ('PE', 'Recife'),
                                  ('CE', 'Fortaleza'),
                                  ('GO', 'Goiânia')
                              ])
@@ -263,6 +263,7 @@ def index():
     if request.method == 'POST' and form.validate_on_submit():
         try:
             novo_registro = Registro(
+                base=form.base.data, 
                 nome=form.nome.data,
                 departamento=form.departamento.data,
                 endereco_ip=form.endereco_ip.data,
@@ -270,7 +271,8 @@ def index():
                 hostname=form.hostname.data,
                 memoria_ram=form.memoria_ram.data,
                 ssd=form.ssd.data,
-                ramal=form.ramal.data
+                ramal=form.ramal.data,
+                anydesk=form.anydesk.data
             )
             db.session.add(novo_registro)
             db.session.commit()
@@ -357,6 +359,7 @@ def editar(id):
     form = MaquinaForm(registro_id=id)
     
     if request.method == 'GET':
+        form.base.data = registro.base
         form.nome.data = registro.nome
         form.departamento.data = registro.departamento
         form.endereco_ip.data = registro.endereco_ip
@@ -365,9 +368,11 @@ def editar(id):
         form.memoria_ram.data = registro.memoria_ram
         form.ssd.data = registro.ssd
         form.ramal.data = registro.ramal
+        form.anydesk.data =  registro.anydesk
     
     if form.validate_on_submit():
         try:
+            registro.base = form.base.data
             registro.nome = form.nome.data
             registro.departamento = form.departamento.data
             registro.endereco_ip = form.endereco_ip.data
@@ -376,6 +381,7 @@ def editar(id):
             registro.memoria_ram = form.memoria_ram.data
             registro.ssd = form.ssd.data
             registro.ramal = form.ramal.data
+            registro.anydesk = form.anydesk.data
             
             db.session.commit()
             registrar_log('Edição de máquina', detalhes=f'Máquina: {registro.nome}, IP: {registro.endereco_ip}') #logs  
