@@ -100,7 +100,7 @@ class Registro(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'base': self.id, #dados das bases
+            'base': self.base, #dados das bases
             'nome': self.nome,
             'departamento': self.departamento,
             'endereco_ip': self.endereco_ip,
