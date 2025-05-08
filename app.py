@@ -611,8 +611,8 @@ def login():
 @app.route('/logout') #rota de logout + logs atribuidas
 @login_required
 def logout():
-    logout_user()
     registrar_log('Logout do sistema', detalhes=f'Usuário: {current_user.username}')
+    logout_user()
     return redirect(url_for('login'))
 
 @app.route('/usuarios', methods=['GET', 'POST']) #cadastro de usuario + logs atribuidas
