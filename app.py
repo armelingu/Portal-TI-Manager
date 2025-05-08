@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, Response
 from flask_wtf import FlaskForm
+from flask_wtf.csrf import CSRFProtect
 from wtforms import StringField, IntegerField, SubmitField, SelectField
 from wtforms.validators import DataRequired, IPAddress, Regexp, ValidationError, Length
 from flask_sqlalchemy import SQLAlchemy
@@ -31,6 +32,7 @@ for var in required_env_vars:
 
 # Configuração do aplicativo
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15) #tempo máximo de conexão
 login_manager = LoginManager()
