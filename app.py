@@ -273,6 +273,10 @@ def index():
     form = MaquinaForm()
     
     if request.method == 'POST' and form.validate_on_submit():
+        campos_obrigatorios = [form.nome.data, form.endereco_ip.data, form.mac_adress.data]
+        if not all(campos_obrigatorios):
+            flash('Preencha todos os campos obrigatórios.', 'Warning')
+            return redirect(url_for('index'))
         try:
             novo_registro = Registro(
                 base=form.base.data, 
