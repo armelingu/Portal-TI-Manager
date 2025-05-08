@@ -23,6 +23,12 @@ from datetime import timedelta
 # Carrega as variáveis de ambiente
 load_dotenv()
 
+#Verificação .env
+required_env_vars = ['SECRET_KEY', 'MYSQL_HOST', 'MYSQL_PORT', 'MYSQL_USER', 'MYSQL_PASSWORD', 'MYSQL_DB']
+for var in required_env_vars:
+    if not os.getenv(var):
+        raise EnvironmentError(f"Variável de ambiente obrigatória não encontrada: {var}")
+
 # Configuração do aplicativo
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
