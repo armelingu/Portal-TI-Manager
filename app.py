@@ -168,7 +168,11 @@ def registrar_log(acao, detalhes=None):
         detalhes=detalhes
     )
     db.session.add(log)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        app.logger.error(f"Erro ao registrar log de auditoria: {e}")
+        db.session.rollback()
 # ------------------------------ TÉRMINO: Função para registrar logs de auditoria  -------------------------
 #
 # ------------------------------ COMEÇO: Validadores personalizados  ---------------------------------------
