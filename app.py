@@ -654,7 +654,8 @@ def usuarios():
                 cargo=cargo,
                 apelido=apelido,
                 avatar='img/default-avatar.png',
-                is_admin=is_admin
+                is_admin=is_admin,
+                trocar_senha=True #força troca no primeiro login
             )
             novo_usuario.set_password(password)
             db.session.add(novo_usuario)
