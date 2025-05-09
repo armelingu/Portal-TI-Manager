@@ -244,8 +244,8 @@ class MaquinaForm(FlaskForm):
         validate_mac_existente
     ])
     hostname = StringField('Hostname', validators=[
-        DataRequired(message="Hostname é obrigatório"),
-        validate_hostname_existente #inserção do validate
+        DataRequired(),
+        Length(min=3, message="Hostname deve ter pelo menos 3 caracteres.")
     ])
     memoria_ram = IntegerField('Memória RAM (GB)', validators=[
         DataRequired(message="Memória RAM é obrigatória")
@@ -284,7 +284,7 @@ def index():
                 departamento=form.departamento.data,
                 endereco_ip=form.endereco_ip.data,
                 mac_adress=form.mac_adress.data,
-                hostname=form.hostname.data,
+                hostname=form.hostname.data.strip(),
                 memoria_ram=form.memoria_ram.data,
                 ssd=form.ssd.data,
                 ramal=form.ramal.data,
@@ -331,7 +331,12 @@ def relatorio():
     
     # Ordenação
     sort_by = request.args.get('sort', 'nome')
+    if sort_by not in ['nome', 'departamento', 'data']:
+        sort_by = 'nome'
+
     order = request.args.get('order', 'asc')
+    if order not in ['asc', 'desc']:
+        order = 'asc'
     
     if sort_by == 'nome':
         if order == 'asc':
@@ -368,7 +373,7 @@ def relatorio():
                            order=order,
                            titulo='Relatório de Máquinas')
 
-@app.route('/editar/<int:id>', methods=['GET', 'POST']) # rota de edição de cadstro + logs atribuidas
+@app.route('/editar/<int:id>', methods=['GET', 'POST']) # rota de edição de cadastro + logs atribuídas
 @login_required
 def editar(id):
     registro = Registro.query.get_or_404(id)
@@ -385,7 +390,7 @@ def editar(id):
         form.ssd.data = registro.ssd
         form.ramal.data = registro.ramal
         form.anydesk.data =  registro.anydesk
-    
+
     if form.validate_on_submit():
         try:
             registro.base = form.base.data
@@ -398,22 +403,27 @@ def editar(id):
             registro.ssd = form.ssd.data
             registro.ramal = form.ramal.data
             registro.anydesk = form.anydesk.data
-            
+
             db.session.commit()
-            registrar_log('Edição de máquina', detalhes=f'Máquina: {registro.nome}, IP: {registro.endereco_ip}') #logs  
-            app.logger.info(f'Máquina atualizada: {registro.nome} ({registro.endereco_ip})')
+            registrar_log('Edição de máquina', detalhes=f'Máquina: {registro.nome}, IP: {registro.endereco_ip}') 
             flash('Máquina atualizada com sucesso!', 'success')
+            app.logger.info(f'Máquina atualizada: {registro.nome} ({registro.endereco_ip})')
             return redirect(url_for('relatorio'))
+
         except IntegrityError as e:
             db.session.rollback()
             app.logger.error(f'Erro ao atualizar máquina: {str(e)}')
             flash('Erro ao atualizar: IP ou MAC Address já existentes no sistema.', 'danger')
+            return redirect(url_for('editar', id=id))  # <- redireciona de volta
+
         except Exception as e:
             db.session.rollback()
             app.logger.error(f'Erro ao atualizar máquina: {str(e)}')
             flash(f'Erro ao atualizar: {str(e)}', 'danger')
+            return redirect(url_for('editar', id=id))  # <- redireciona de volta
     
     return render_template('editar.html', form=form, registro=registro, titulo='Editar Máquina')
+
 
 @app.route('/excluir/<int:id>') # rota de exclusão de cadastro + logs atribuidas 
 @login_required
@@ -427,8 +437,8 @@ def excluir(id):
         flash(f'Máquina "{nome}" removida com sucesso!', 'success')
         app.logger.info(f'Máquina excluída: ID {id} - {nome}')
     except Exception as e:
-        db.session.rollback()
-        flash(f'Erro ao excluir registro: {str(e)}', 'danger')
+        flash('Erro ao excluir máquina.', 'danger')
+        app.logger.error(f'Erro ao excluir máquina: {e}')
     
     return redirect(url_for('relatorio'))
 
@@ -460,13 +470,14 @@ def exportar_csv():
         cw = csv.writer(si)
         
         # Cabeçalhos
-        cw.writerow(['Nome', 'Departamento', 'Endereço IP', 'MAC Address', 
-                     'Hostname', 'Memória RAM (GB)', 'SSD (GB)', 
+        cw.writerow(['Base', 'Nome', 'Departamento', 'Endereço IP', 'MAC Address', 
+                     'Hostname', 'Memória RAM (GB)', 'SSD (GB)', 'Ramal', 'Anydesk'
                      'Data de Cadastro', 'Ultima Atualizacao'])
         
         # Dados
         for registro in registros:
             cw.writerow([
+                registro.base, 
                 registro.nome,
                 registro.departamento,
                 registro.endereco_ip,
@@ -475,6 +486,7 @@ def exportar_csv():
                 registro.memoria_ram,
                 registro.ssd,
                 registro.ramal,
+                registro.anydesk,
                 registro.data_cadastro.strftime('%d/%m/%Y %H:%M'),
                 registro.ultima_atualizacao.strftime('%d/%m/%Y %H:%M')
             ])
@@ -838,10 +850,16 @@ def logs_auditoria():
         query = query.join(Usuario).filter(Usuario.username.ilike(f'%{usuario}%'))
     if acao:
         query = query.filter(LogAuditoria.acao.ilike(f'%{acao}%'))
-    if data_inicio:
-        query = query.filter(LogAuditoria.data_hora >= data_inicio)
-    if data_fim:
-        query = query.filter(LogAuditoria.data_hora <= data_fim)
+
+    try:
+        if data_inicio:
+            data_inicio_obj = datetime.strptime(data_inicio, "%Y-%m-%d")
+            query = query.filter(LogAuditoria.data_hora >= data_inicio_obj)
+        if data_fim:
+            data_fim_obj = datetime.strptime(data_fim, "%Y-%m-%d")
+            query = query.filter(LogAuditoria.data_hora <= data_fim_obj)
+    except ValueError:
+        flash("Formato de data inválido. Use o formato YYYY-MM-DD.", "warning")
 
     logs = query.order_by(LogAuditoria.data_hora.desc()).all()
 
