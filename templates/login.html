@@ -19,15 +19,16 @@
                         {% endif %}
                     {% endwith %}
 
-                    <form method="POST">
+                    <form method="POST" action="{{ url_for('login') }}">
+                        {{ form.hidden_tag() }}
+                        
                         <div class="mb-3">
                             <label for="username" class="form-label">Usuário</label>
-                            <input type="text" class="form-control" id="username" name="username" required autofocus>
+                            {{ form.username(class="form-control", id="username", required=True, autofocus=True) }}
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Senha</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <input type="hidden" name="csrf_token" valeu="{{ csrf_token }}">
+                            {{ form.password(class="form-control", id="password", required=True) }}
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Entrar</button>
                     </form>

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, Response
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
-from wtforms import StringField, IntegerField, SubmitField, SelectField
+from wtforms import StringField, IntegerField, SubmitField, SelectField, PasswordField
 from wtforms.validators import DataRequired, IPAddress, Regexp, ValidationError, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_paginate import Pagination, get_page_parameter
@@ -158,6 +158,11 @@ class LogAuditoria(db.Model):
 
     def __repr__(self):
         return f"<LogAuditoria {self.acao} - {self.data_hora}>"
+    
+class LoginForm(FlaskForm):
+    username = StringField('Usuário', validators=[DataRequired()])
+    password = PasswordField('Senha', validators=[DataRequired()])
+    submit = SubmitField('Entrar')
 # ------------------------------ TÉRMINO: Modelos de dados (classes) ---------------------------------------
 #
 # ------------------------------ COMEÇO: Função para registrar logs de auditoria  --------------------------
@@ -198,7 +203,6 @@ def validate_anydesk_existente(form, field):
     if Registro.query.filter(Registro.anydesk == field.data, Registro.id != getattr(form, 'id', None)).first():
         raise ValidationError('Este anydesk já está em uso.')
                              
-
 # ------------------------------ TÉRMINO: Validadores personalizados  --------------------------------------
 #
 #  ------------------------------ COMEÇO: Formulário de cadastro/edição ------------------------------------
@@ -589,17 +593,20 @@ def estatisticas():
                          distribuicao_ram=sorted(distribuicao_ram, key=lambda x: x['tamanho']),
                          distribuicao_ssd=sorted(distribuicao_ssd, key=lambda x: x['tamanho']))
 
-@app.route('/login', methods=['GET', 'POST']) #rota de login + logs atribuidas
+# Rota de login
+@app.route('/login', methods=['GET', 'POST'])  # rota de login + logs atribuídas
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
+    form = LoginForm()
+
     if 'tentativas' not in session:
         session['tentativas'] = 0
 
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         user = Usuario.query.filter_by(username=username).first()
 
         if session['tentativas'] >= 5:
@@ -610,7 +617,7 @@ def login():
 
         if user and user.check_password(password):
             login_user(user)
-            registrar_log('Login no sistema', detalhes=f'Usuário: {user.username}') #logs
+            registrar_log('Login no sistema', detalhes=f'Usuário: {user.username}')
             session.permanent = True
             session.pop('tentativas', None)
 
@@ -622,7 +629,7 @@ def login():
             session['tentativas'] += 1
             flash('Usuário ou senha inválidos.', 'danger')
 
-    return render_template('login.html', titulo='Login')
+    return render_template('login.html', form=form, titulo='Login')
 
 @app.route('/logout') #rota de logout + logs atribuidas
 @login_required
@@ -934,6 +941,20 @@ with app.app_context():
     app.logger.info('Banco de dados inicializado')
 # ------------------------------ TÉRMINO: Criar todas as tabelas do banco de dados --------------------------
 #
+
+# Script para inserir colunas no banco
+
+from sqlalchemy import text
+
+with app.app_context():
+    try:
+        db.engine.execute(text("ALTER TABLE registros ADD COLUMN base VARCHAR(100) NOT NULL DEFAULT 'SP'"))
+        db.engine.execute(text("ALTER TABLE registros ADD COLUMN anydesk VARCHAR(20) NOT NULL UNIQUE"))
+        print("Colunas 'base' e 'anydesk' adicionadas com sucesso!")
+    except Exception as e:
+        print(f"Erro ao adicionar colunas: {e}")
+
+
 # ------------------------------ COMEÇO: Aplicação principal -----------------------------------------------
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

@@ -26,6 +26,7 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
+                    <th>Base</th>
                     <th>Nome</th>
                     <th>Departamento</th>
                     <th>IP</th>
@@ -34,12 +35,14 @@
                     <th>RAM</th>
                     <th>SSD</th>
                     <th>Ramal</th>
+                    <th>Anydesk</th>
                     <th class="text-center">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for registro in registros.items %}
                 <tr>
+                    <td>{{ registro.base }}</td>
                     <td>{{ registro.nome }}</td>
                     <td>{{ registro.departamento }}</td>
                     <td>{{ registro.endereco_ip }}</td>
@@ -48,6 +51,7 @@
                     <td>{{ registro.memoria_ram }} GB</td>
                     <td>{{ registro.ssd }} GB</td>
                     <td>{{ registro.ramal }}</td>
+                    <td>{{ registro.anydesk }}</td>
                     <td class="text-center">
                         <a href="{{ url_for('editar', id=registro.id) }}" class="btn btn-sm btn-warning me-2" title="Editar">
                             <i class="fas fa-edit"></i>
