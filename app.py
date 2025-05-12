@@ -946,13 +946,13 @@ with app.app_context():
 
 from sqlalchemy import text
 
-with app.app_context():
-    try:
-        db.engine.execute(text("ALTER TABLE registros ADD COLUMN base VARCHAR(100) NOT NULL DEFAULT 'SP'"))
-        db.engine.execute(text("ALTER TABLE registros ADD COLUMN anydesk VARCHAR(20) NOT NULL UNIQUE"))
-        print("Colunas 'base' e 'anydesk' adicionadas com sucesso!")
-    except Exception as e:
-        print(f"Erro ao adicionar colunas: {e}")
+# with app.app_context():
+#    try:
+#        db.engine.execute(text("ALTER TABLE registros ADD COLUMN base VARCHAR(100) NOT NULL DEFAULT 'SP'"))
+#        db.engine.execute(text("ALTER TABLE registros ADD COLUMN anydesk VARCHAR(20) NOT NULL UNIQUE"))
+#        print("Colunas 'base' e 'anydesk' adicionadas com sucesso!")
+#    except Exception as e:
+#        print(f"Erro ao adicionar colunas: {e}")
 
 
 # ------------------------------ COMEÇO: Aplicação principal -----------------------------------------------
