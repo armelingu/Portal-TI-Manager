@@ -7,6 +7,11 @@
 
     <title>{{ titulo }} - Portal TI Manager</title>
 
+    <!-- SEO & Acessibilidade -->
+    <meta name="description" content="Portal interno de gerenciamento de TI.">
+    <meta name="author" content="Guty TI">
+    <meta name="robots" content="noindex, nofollow">
+
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 
@@ -15,6 +20,7 @@
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -46,16 +52,15 @@
                     {% if current_user.is_admin %}
                     <li class="nav-item mx-2">
                         <a class="nav-link" href="{{ url_for('logs_auditoria') }}">Auditoria</a>
-                    </li>
-                    {% if current_user.is_admin %}
+                    </li> 
                     <li class="nav-item mx-2">
                         <a class="nav-link" href="{{ url_for('usuarios') }}">Usuários</a>
                     </li>
                     {% endif %}
-
                     <li class="nav-item dropdown ms-3">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" width="30" height="30" class="rounded-circle" style="object-fit: cover;">
+                            <img src="{{ url_for('static', filename=current_user.avatar or 'img/default-avatar.png') }}"
+                                 alt="Avatar" width="30" height="30" class="rounded-circle" style="object-fit: cover;">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('perfil') }}">Meu Perfil</a></li>
@@ -65,7 +70,6 @@
                             <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Sair</a></li>
                         </ul>
                     </li>
-
                 </ul>
                 {% else %}
                 <ul class="navbar-nav ms-auto">
@@ -84,9 +88,10 @@
             {% if messages %}
                 <div id="flash-messages">
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mt-3 d-flex align-items-center" role="alert">
+                            <i class="fa-solid fa-circle-info me-2"></i>
                             {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     {% endfor %}
                 </div>
@@ -95,52 +100,39 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <div class="container mt-4">
+    <div class="container mt-4" id="main-content">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-
-    <!-- jQuery (DataTables depende) -->
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-    <!-- DataTables Buttons Extension -->
+    <!-- DataTables Buttons -->
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-
-    <!-- JSZip para exportar Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-
-    <!-- pdfmake para exportar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
-    <!-- DataTables Buttons CSS -->
-    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
-
+    <!-- Flash Auto Fade -->
     <script>
-        // Fade out automático para mensagens flash
         window.setTimeout(function() {
             const flashMessages = document.getElementById('flash-messages');
             if (flashMessages) {
                 flashMessages.style.transition = "opacity 0.5s ease";
                 flashMessages.style.opacity = '0';
-                setTimeout(() => {
-                    flashMessages.remove();
-                }, 500);
+                setTimeout(() => flashMessages.remove(), 500);
             }
-        }, 4000); // 4 segundos para sumir
+        }, 4000);
     </script>
 </body>
 </html>
