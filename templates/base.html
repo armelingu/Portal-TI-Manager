@@ -45,6 +45,10 @@
                     </li>
                     {% if current_user.is_admin %}
                     <li class="nav-item mx-2">
+                        <a class="nav-link" href="{{ url_for('logs_auditoria') }}">Auditoria</a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item mx-2">
                         <a class="nav-link" href="{{ url_for('usuarios') }}">Usuários</a>
                     </li>
                     {% endif %}
