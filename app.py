@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, Response
 from flask_wtf import FlaskForm
-from flask_wtf.csrf import CSRFProtect
+# from flask_wtf.csrf import CSRFProtect
 from wtforms import StringField, IntegerField, SubmitField, SelectField, PasswordField
 from wtforms.validators import DataRequired, IPAddress, Regexp, ValidationError, Length
 from flask_sqlalchemy import SQLAlchemy
@@ -32,7 +32,7 @@ for var in required_env_vars:
 
 # Configuração do aplicativo
 app = Flask(__name__)
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15) #tempo máximo de conexão
 login_manager = LoginManager()
@@ -91,7 +91,7 @@ class Registro(db.Model):
     hostname = db.Column(db.String(100), nullable=False, index=True)
     memoria_ram = db.Column(db.Integer, nullable=False)
     ssd = db.Column(db.Integer, nullable=False) 
-    ramal = db.Column(db.Integer, nullable=False) #dados de ramal
+    ramal = db.Column(db.Integer, nullable=False, unique=True) #dados de ramal
     anydesk  = db.Column(db.String(20), nullable=False, unique=True, index=True) #dados de anydesk! 06.05
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
     ultima_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -226,16 +226,17 @@ class MaquinaForm(FlaskForm):
     departamento = SelectField('Departamento', validators=[DataRequired(message="Departamento é obrigatório")], 
                              choices=[
                                  ('TI', 'Tecnologia da Informação'),
-                                 ('Operações', 'Operações'),
-                                 ('Administração', 'Administração'),
-                                 ('Controladoria', 'Controladoria'),
+                                 ('ComGer', 'Compras Gerais'),
+                                 ('Copag', 'Contas a pagar'),
+                                 ('Corec', 'Contas a receber'),
                                  ('Fiscal', 'Fiscal'),
                                  ('RH', 'Recursos Humanos'),
-                                 ('Marketing', 'Marketing'),
-                                 ('Vendas', 'Vendas'),
+                                 ('Contabilidade', 'Contabilidade'),
+                                 ('Tesouraria', 'Tesouraria'),
                                  ('Diretoria', 'Diretoria'),
-                                 ('Engenharia', 'Engenharia'),
-                                 ('Manutenção', 'Manutenção')
+                                 ('Segurança', 'Segurança do Trabalho'),
+                                 ('Controladoria F.', 'Controladoria Financeira'),
+                                 ('Ambiental', 'Ambiental')
                              ])
     endereco_ip = StringField('Endereço IP', validators=[
         DataRequired(message="Endereço IP é obrigatório"),
@@ -271,7 +272,7 @@ class MaquinaForm(FlaskForm):
 #  ------------------------------ TÉRMINO: Formulário de cadastro/edição ------------------------------------
 #
 # ------------------------------ COMEÇO: Rotas (protegidas com loginRequired) ------------------------------
-@app.route('/', methods=['GET', 'POST']) # rota de cadastro + logs atribuidas
+@app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
     form = MaquinaForm()
@@ -286,17 +287,18 @@ def index():
                 base=form.base.data, 
                 nome=form.nome.data,
                 departamento=form.departamento.data,
-                endereco_ip=form.endereco_ip.data,
-                mac_adress=form.mac_adress.data,
+                endereco_ip=form.endereco_ip.data.strip(),  # Remove espaços
+                mac_adress=form.mac_adress.data.upper().replace('-', ':').strip(),  # Padroniza e remove espaços
                 hostname=form.hostname.data.strip(),
                 memoria_ram=form.memoria_ram.data,
                 ssd=form.ssd.data,
                 ramal=form.ramal.data,
                 anydesk=form.anydesk.data
             )
+            app.logger.debug(f"Salvando IP: '{novo_registro.endereco_ip}', MAC: '{novo_registro.mac_adress}'") # Log de debug
             db.session.add(novo_registro)
             db.session.commit()
-            registrar_log('Cadastro de máquina', detalhes=f'Máquina: {form.nome.data}, IP: {form.endereco_ip.data}') #função de captura de logs
+            registrar_log('Cadastro de máquina', detalhes=f'Máquina: {form.nome.data}, IP: {form.endereco_ip.data}')
             flash('Máquina cadastrada com sucesso!', 'success')
             app.logger.info(f'Nova máquina cadastrada: {form.nome.data} ({form.endereco_ip.data})')
             return redirect(url_for('relatorio'))
@@ -377,7 +379,7 @@ def relatorio():
                            order=order,
                            titulo='Relatório de Máquinas')
 
-@app.route('/editar/<int:id>', methods=['GET', 'POST']) # rota de edição de cadastro + logs atribuídas
+@app.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
 def editar(id):
     registro = Registro.query.get_or_404(id)
@@ -400,14 +402,15 @@ def editar(id):
             registro.base = form.base.data
             registro.nome = form.nome.data
             registro.departamento = form.departamento.data
-            registro.endereco_ip = form.endereco_ip.data
-            registro.mac_adress = form.mac_adress.data
-            registro.hostname = form.hostname.data
+            registro.endereco_ip = form.endereco_ip.data.strip() # Remove espaços
+            registro.mac_adress = form.mac_adress.upper().replace('-', ':').strip() # Padroniza e remove espaços
+            registro.hostname = form.hostname.data.strip()
             registro.memoria_ram = form.memoria_ram.data
             registro.ssd = form.ssd.data
             registro.ramal = form.ramal.data
             registro.anydesk = form.anydesk.data
 
+            app.logger.debug(f"Atualizando IP: '{registro.endereco_ip}', MAC: '{registro.mac_adress}'") # Log de debug
             db.session.commit()
             registrar_log('Edição de máquina', detalhes=f'Máquina: {registro.nome}, IP: {registro.endereco_ip}') 
             flash('Máquina atualizada com sucesso!', 'success')
@@ -418,13 +421,13 @@ def editar(id):
             db.session.rollback()
             app.logger.error(f'Erro ao atualizar máquina: {str(e)}')
             flash('Erro ao atualizar: IP ou MAC Address já existentes no sistema.', 'danger')
-            return redirect(url_for('editar', id=id))  # <- redireciona de volta
+            return redirect(url_for('editar', id=id))
 
         except Exception as e:
             db.session.rollback()
             app.logger.error(f'Erro ao atualizar máquina: {str(e)}')
             flash(f'Erro ao atualizar: {str(e)}', 'danger')
-            return redirect(url_for('editar', id=id))  # <- redireciona de volta
+            return redirect(url_for('editar', id=id))
     
     return render_template('editar.html', form=form, registro=registro, titulo='Editar Máquina')
 
@@ -783,7 +786,7 @@ def trocar_senha_perfil():
 
     return render_template('trocar_senha.html', titulo='Trocar Senha')
 
-@app.route('/excluir_usuario/<int:id>') #excluir usuario + logs atribuidas
+@app.route('/excluir_usuario/<int:id>', methods=['GET', 'POST']) #excluir usuario + logs atribuidas
 @login_required
 def excluir_usuario(id):
     if not current_user.is_admin:
@@ -826,7 +829,6 @@ def trocar_senha_obrigatorio():
         return redirect(url_for('index'))
 
     return render_template('trocar_senha_obrigatorio.html', titulo='Trocar Senha')
-
 
 @app.route('/resetar_senha_usuario/<int:id>', methods=['GET']) #resetar senha
 @login_required 
@@ -871,7 +873,6 @@ def logs_auditoria():
     logs = query.order_by(LogAuditoria.data_hora.desc()).all()
 
     return render_template('logs_auditoria.html', logs=logs, titulo='Auditoria do Sistema')
-
 
 @app.route('/exportar_logs')
 @login_required
@@ -921,7 +922,6 @@ def exportar_logs():
                     headers={"Content-Disposition": "attachment;filename=logs_auditoria.csv"})
 
 
-
 # ------------------------------ TÉRMINO: Rotas (protegidas com loginRequired) ------------------------------
 #
 # ------------------------------ COMEÇO: Tratamento de erros ------------------------------------------------
@@ -956,8 +956,28 @@ from sqlalchemy import text
 
 
 # ------------------------------ COMEÇO: Aplicação principal -----------------------------------------------
+
+#class PrefixMiddleware:
+#    def __init__(self, app, prefix=''):
+#        self.app = app
+#        self.prefix = prefix
+#
+#    def __call__(self, environ, start_response):
+#        if environ['PATH_INFO'].startswith(self.prefix):
+#            environ['SCRIPT_NAME'] = self.prefix
+#            environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
+#            return self.app(environ, start_response)
+#        else:
+#            start_response('404 Not Found', [('Content-Type', 'text/plain')])
+#            return [b'This URL does not belong to the app.']
+
+# Envolver o app com o prefixo
+#app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/portal-ti-manager')
+
+# ------------------------------ COMEÇO: Aplicação principal -----------------------------------------------
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5050))
     debug = os.environ.get('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=True)
 # ------------------------------ TÉRMINO: Aplicação principal -----------------------------------------------
+
