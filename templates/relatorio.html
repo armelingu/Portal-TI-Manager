@@ -56,7 +56,7 @@
                         <a href="{{ url_for('editar', id=registro.id) }}" class="btn btn-sm btn-warning me-2" title="Editar">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <button onclick="confirmarExclusao({{ registro.id }})" class="btn btn-sm btn-danger" title="Excluir">
+                        <button onclick="confirmarExclusao('{{ registro.id }}')" class="btn btn-sm btn-danger" title="Excluir">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
