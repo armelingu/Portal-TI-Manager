@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField, SelectField, PasswordField
 from wtforms.validators import DataRequired, IPAddress, Regexp, ValidationError, Length
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from flask_paginate import Pagination, get_page_parameter
 from sqlalchemy.exc import IntegrityError
 import os
@@ -317,16 +318,16 @@ def index():
 @login_required
 def relatorio():
     page = request.args.get(get_page_parameter(), type=int, default=1)
-    search = request.args.get('search', '')
+    search = request.args.get('search', '').strip()
     per_page = app.config['PAGINATION_PER_PAGE']
     
     query = Registro.query
-    
+
     # Aplicar busca se informada
     if search:
         search_term = f"%{search}%"
         query = query.filter(
-            db.or_(
+            or_(
                 Registro.nome.ilike(search_term),
                 Registro.departamento.ilike(search_term),
                 Registro.endereco_ip.ilike(search_term),
@@ -345,20 +346,11 @@ def relatorio():
         order = 'asc'
     
     if sort_by == 'nome':
-        if order == 'asc':
-            query = query.order_by(Registro.nome)
-        else:
-            query = query.order_by(Registro.nome.desc())
+        query = query.order_by(Registro.nome if order == 'asc' else Registro.nome.desc())
     elif sort_by == 'departamento':
-        if order == 'asc':
-            query = query.order_by(Registro.departamento)
-        else:
-            query = query.order_by(Registro.departamento.desc())
+        query = query.order_by(Registro.departamento if order == 'asc' else Registro.departamento.desc())
     elif sort_by == 'data':
-        if order == 'asc':
-            query = query.order_by(Registro.data_cadastro)
-        else:
-            query = query.order_by(Registro.data_cadastro.desc())
+        query = query.order_by(Registro.data_cadastro if order == 'asc' else Registro.data_cadastro.desc())
     
     # Paginação
     registros = query.paginate(page=page, per_page=per_page)
@@ -378,6 +370,7 @@ def relatorio():
                            sort_by=sort_by,
                            order=order,
                            titulo='Relatório de Máquinas')
+
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
