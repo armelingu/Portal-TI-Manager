@@ -1,14 +1,36 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mt-2">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+          {% if category == 'success' %}
+            <i class="fas fa-check-circle me-2"></i>
+          {% elif category == 'danger' %}
+            <i class="fas fa-exclamation-circle me-2"></i>
+          {% elif category == 'warning' %}
+            <i class="fas fa-exclamation-triangle me-2"></i>
+          {% elif category == 'info' %}
+            <i class="fas fa-info-circle me-2"></i>
+          {% endif %}
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <div class="row align-items-center mb-4">
     <div class="col-md-6">
-        <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="fas fa-search text-muted"></i>
-            </span>
-            <input type="text" name="search" class="form-control border-start-0" placeholder="Pesquisar por nome, departamento, IP..." value="{{ search }}">
-        </div>
+        <form method="GET">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Pesquisar por nome, departamento, IP..." value="{{ search }}">
+                <button class="btn btn-outline-primary" type="submit">Buscar</button>
+            </div>
+        </form>
     </div>
 
     <div class="col-md-6 text-end">
@@ -27,15 +49,25 @@
             <thead class="table-light">
                 <tr>
                     <th>Base</th>
-                    <th>Nome</th>
+                    <th class="p-0">
+                        <a href="{{ url_for('relatorio', sort_by='nome', order='asc' if sort_by != 'nome' or order == 'desc' else 'desc', search=search) }}"
+                           class="d-block px-3 py-2 text-dark text-decoration-none w-100 h-100">
+                            Nome
+                            {% if sort_by == 'nome' %}
+                                <i class="fas fa-chevron-{{ 'up' if order == 'asc' else 'down' }} small text-muted ms-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort small text-muted ms-1"></i>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Departamento</th>
                     <th>IP</th>
                     <th>MAC</th>
-                    <th>Hostname</th>
-                    <th>RAM</th>
-                    <th>SSD</th>
+                    <th class="d-none d-md-table-cell">Hostname</th>
+                    <th class="d-none d-md-table-cell">RAM</th>
+                    <th class="d-none d-md-table-cell">SSD</th>
                     <th>Ramal</th>
-                    <th>Anydesk</th>
+                    <th class="d-none d-md-table-cell">Anydesk</th>
                     <th class="text-center">Ações</th>
                 </tr>
             </thead>
@@ -47,18 +79,29 @@
                     <td>{{ registro.departamento }}</td>
                     <td>{{ registro.endereco_ip }}</td>
                     <td>{{ registro.mac_adress }}</td>
-                    <td>{{ registro.hostname }}</td>
-                    <td>{{ registro.memoria_ram }} GB</td>
-                    <td>{{ registro.ssd }} GB</td>
+                    <td class="d-none d-md-table-cell">{{ registro.hostname }}</td>
+                    <td class="d-none d-md-table-cell">{{ registro.memoria_ram }} GB</td>
+                    <td class="d-none d-md-table-cell">{{ registro.ssd }} GB</td>
                     <td>{{ registro.ramal }}</td>
-                    <td>{{ registro.anydesk }}</td>
+                    <td class="d-none d-md-table-cell">{{ registro.anydesk }}</td>
                     <td class="text-center">
-                        <a href="{{ url_for('editar', id=registro.id) }}" class="btn btn-sm btn-warning me-2" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button onclick="confirmarExclusao('{{ registro.id }}')" class="btn btn-sm btn-danger" title="Excluir">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ações
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('editar', id=registro.id) }}">
+                                        <i class="fas fa-edit me-2 text-warning"></i> Editar
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#" onclick="confirmarExclusao('{{ registro.id }}')">
+                                        <i class="fas fa-trash me-2"></i> Excluir
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
