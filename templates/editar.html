@@ -6,8 +6,22 @@
     
     <form method="POST" class="needs-validation" novalidate>
         {{ form.csrf_token }}
-        
-        <div class="row g-3">
+
+        <div class="row g-3"> <!-- campo BASE-->
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.base.label(class="form-label") }}
+                    {{ form.base(class="form-control" + (" is-invalid" if form.base.errors else "")) }}
+                    {% if form.base.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.base.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>  
+
             <div class="col-md-6">
                 <div class="form-group">
                     {{ form.nome.label(class="form-label") }}
@@ -50,7 +64,7 @@
                 </div>
             </div>
             
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     {{ form.mac_adress.label(class="form-label") }}
                     {{ form.mac_adress(class="form-control" + (" is-invalid" if form.mac_adress.errors else "")) }}
@@ -119,8 +133,23 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
-        
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    {{ form.anydesk.label(class="form-label") }}
+                    {{ form.anydesk(class="form-control" + (" is-invalid" if form.anydesk.errors else "")) }}
+                    {% if form.anydesk.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.anydesk.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div> <!-- fecha row -->
+
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Salvar Alterações</button>
             <a href="{{ url_for('relatorio') }}" class="btn btn-secondary">Cancelar</a>
