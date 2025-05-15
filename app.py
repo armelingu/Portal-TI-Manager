@@ -403,7 +403,7 @@ def editar(id):
             registro.nome = form.nome.data
             registro.departamento = form.departamento.data
             registro.endereco_ip = form.endereco_ip.data.strip() # Remove espaços
-            registro.mac_adress = form.mac_adress.upper().replace('-', ':').strip() # Padroniza e remove espaços
+            registro.mac_adress = form.mac_adress.data.upper().replace('-', ':').strip()
             registro.hostname = form.hostname.data.strip()
             registro.memoria_ram = form.memoria_ram.data
             registro.ssd = form.ssd.data
