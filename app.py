@@ -184,6 +184,7 @@ def registrar_log(acao, detalhes=None):
 # ------------------------------ TÉRMINO: Função para registrar logs de auditoria  -------------------------
 #
 # ------------------------------ COMEÇO: Validadores personalizados  ---------------------------------------
+
 def validate_hostname_existente(form, field):
     if len(field.data) < 3:
         raise ValidationError('O hostname deve ter pelo menos 3 caracteres.')
@@ -192,7 +193,8 @@ def validate_hostname_existente(form, field):
         raise ValidationError('Este hostname já está em uso.')
 
 def validate_ip_existente(form, field):
-    if Registro.query.filter(Registro.endereco_ip == field.data, Registro.id != getattr(form, 'id', None)).first():
+    registro_id = form.id if hasattr(form, 'id') else None
+    if Registro.query.filter(Registro.endereco_ip == field.data, Registro.id != registro_id).first():
         raise ValidationError('Este endereço IP já está em uso.')
 
 def validate_mac_existente(form, field):
@@ -704,14 +706,11 @@ def editar_perfil():
         email = request.form['email']
         setor = request.form['setor']
         cargo = request.form['cargo']
-
-        # Atualiza os dados do usuário
         current_user.apelido = apelido
         current_user.email = email
         current_user.setor = setor
         current_user.cargo = cargo
 
-        # Se o usuário enviou um novo avatar
         if 'avatar' in request.files:
             avatar = request.files['avatar']
             if avatar and avatar.filename != '':
@@ -720,13 +719,14 @@ def editar_perfil():
                 avatar.save(avatar_path)
                 current_user.avatar = f'img/avatars/{filename}'
 
-        # Salva as alterações no banco
-        db.session.commit()
+        try:
+            db.session.commit()
+            flash('Perfil atualizado com sucesso!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash('Erro ao atualizar perfil.', 'danger')
 
-        flash('Perfil atualizado com sucesso!', 'success')
         return redirect(url_for('perfil'))
-
-    return render_template('editar_perfil.html', titulo='Editar Perfil')
 
 @app.route('/editar_usuario/<int:id>', methods=['GET', 'POST']) #editar usuario + logs atribuidas
 @login_required 
