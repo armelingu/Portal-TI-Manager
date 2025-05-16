@@ -76,7 +76,7 @@ db = SQLAlchemy(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Usuario.query.get(int(user_id))
+    return db.session.get(Usuario, int(user_id))
 # ------------------------------ TÉRMINO: Configuração de logs --------------------------------------------
 #
 # ------------------------------ COMEÇO: Modelos de dados (classes) ---------------------------------------
