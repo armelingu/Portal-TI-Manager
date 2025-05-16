@@ -262,7 +262,7 @@ class MaquinaForm(FlaskForm):
     ramal = IntegerField('Ramal', validators=[
         DataRequired(message="O ramal é obrigatório")
     ])
-    anydesk = IntegerField('Anydesk', validators=[
+    anydesk = StringField('Anydesk', validators=[
         DataRequired(message="Anydesk é obrigatório"),
         validate_anydesk_existente #campo anydesk
     ])
@@ -471,7 +471,7 @@ def exportar_csv():
         
         # Cabeçalhos
         cw.writerow(['Base', 'Nome', 'Departamento', 'Endereço IP', 'MAC Address', 
-                     'Hostname', 'Memória RAM (GB)', 'SSD (GB)', 'Ramal', 'Anydesk'
+                     'Hostname', 'Memória RAM (GB)', 'SSD (GB)', 'Ramal', 'Anydesk',
                      'Data de Cadastro', 'Ultima Atualizacao'])
         
         # Dados
