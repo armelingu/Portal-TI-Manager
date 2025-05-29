@@ -164,6 +164,22 @@ class LoginForm(FlaskForm):
     username = StringField('Usuário', validators=[DataRequired()])
     password = PasswordField('Senha', validators=[DataRequired()])
     submit = SubmitField('Entrar')
+
+class Base(db.Model): #class base inclusa 29/05
+    __tablename__ = 'bases'
+    id = db.Column(db.String(10), primary_key=True)
+    nome = db.Column(db.String(100), nullable=False, unique=True)
+
+    def __repr__(self):
+        return f'<Base {self.nome}>'
+
+class Departamento(db.Model): #class departamentos 29/05 
+    __tablename__ = 'departamentos'
+    id = db.Column(db.String(20), primary_key=True)
+    nome = db.Column(db.String(100), nullable=False, unique=True)
+
+    def __repr__(self):
+        return f'<Departamento {self.nome}>'
 # ------------------------------ TÉRMINO: Modelos de dados (classes) ---------------------------------------
 #
 # ------------------------------ COMEÇO: Função para registrar logs de auditoria  --------------------------
@@ -209,38 +225,14 @@ def validate_anydesk_existente(form, field):
 # ------------------------------ TÉRMINO: Validadores personalizados  --------------------------------------
 #
 #  ------------------------------ COMEÇO: Formulário de cadastro/edição ------------------------------------
+
 class MaquinaForm(FlaskForm):
-    #campo base
-    base = SelectField('Base', validators=[DataRequired(message="Escolha a base...")], 
-                             choices=[
-                                 ('SP', 'Matriz'),
-                                 ('SC', 'Florianópolis'),
-                                 ('RJ', 'Rio de Janeiro'),
-                                 ('BA', 'Salvador'),
-                                 ('MG', 'Belo Horizonte'),
-                                 ('PE', 'Recife'),
-                                 ('CE', 'Fortaleza'),
-                                 ('GO', 'Goiânia')
-                             ])
+    base = SelectField('Base', validators=[DataRequired(message="Escolha a base...")], choices=[])
     nome = StringField('Nome da Máquina', validators=[
         DataRequired(message="Nome é obrigatório"),
         Length(min=2, max=100, message="Nome deve ter entre 2 e 100 caracteres")
     ])
-    departamento = SelectField('Departamento', validators=[DataRequired(message="Departamento é obrigatório")], 
-                             choices=[
-                                 ('TI', 'Tecnologia da Informação'), 
-                                 ('ComGer', 'Compras Gerais'), 
-                                 ('Copag', 'Contas a pagar'), 
-                                 ('Corec', 'Contas a receber'), 
-                                 ('Fiscal', 'Fiscal'), 
-                                 ('RH', 'Recursos Humanos'), 
-                                 ('Contabilidade', 'Contabilidade'), 
-                                 ('Tesouraria', 'Tesouraria'), 
-                                 ('Diretoria', 'Diretoria'), 
-                                 ('Segurança', 'Segurança do Trabalho'), 
-                                 ('Controladoria F.', 'Controladoria Financeira'), 
-                                 ('Ambiental', 'Ambiental')
-                             ])
+    departamento = SelectField('Departamento', validators=[DataRequired(message="Departamento é obrigatório")], choices=[])
     endereco_ip = StringField('Endereço IP', validators=[
         DataRequired(message="Endereço IP é obrigatório"),
         IPAddress(message="Endereço IP inválido"),
@@ -248,30 +240,27 @@ class MaquinaForm(FlaskForm):
     ])
     mac_adress = StringField('MAC Address', validators=[
         DataRequired(message="MAC Address é obrigatório"),
-        Regexp(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$', message="Formato de MAC Address inválido. Use o formato XX:XX:XX:XX:XX:XX"),
+        Regexp(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$', message="Formato de MAC Address inválido"),
         validate_mac_existente
     ])
     hostname = StringField('Hostname', validators=[
         DataRequired(),
         Length(min=3, message="Hostname deve ter pelo menos 3 caracteres.")
     ])
-    memoria_ram = IntegerField('Memória RAM (GB)', validators=[
-        DataRequired(message="Memória RAM é obrigatória")
-    ])
-    ssd = IntegerField('SSD (GB)', validators=[
-        DataRequired(message="Capacidade do SSD é obrigatória")
-    ])
-    ramal = IntegerField('Ramal', validators=[
-        DataRequired(message="O ramal é obrigatório")
-    ])
+    memoria_ram = IntegerField('Memória RAM (GB)', validators=[DataRequired()])
+    ssd = IntegerField('SSD (GB)', validators=[DataRequired()])
+    ramal = IntegerField('Ramal', validators=[DataRequired()])
     anydesk = StringField('Anydesk', validators=[
         DataRequired(message="Anydesk é obrigatório"),
-        validate_anydesk_existente #campo anydesk
+        validate_anydesk_existente
     ])
-    
+
     def __init__(self, *args, registro_id=None, **kwargs):
         super(MaquinaForm, self).__init__(*args, **kwargs)
         self.id = registro_id
+        self.base.choices = [(b.id, b.nome) for b in Base.query.order_by(Base.nome).all()]
+        self.departamento.choices = [(d.id, d.nome) for d in Departamento.query.order_by(Departamento.nome).all()]
+
 #  ------------------------------ TÉRMINO: Formulário de cadastro/edição ------------------------------------
 #
 # ------------------------------ COMEÇO: Rotas (protegidas com loginRequired) ------------------------------
