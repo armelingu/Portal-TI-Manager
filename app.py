@@ -228,17 +228,17 @@ class MaquinaForm(FlaskForm):
     ])
     departamento = SelectField('Departamento', validators=[DataRequired(message="Departamento é obrigatório")], 
                              choices=[
-                                 ('TI', 'Tecnologia da Informação'),
-                                 ('ComGer', 'Compras Gerais'),
-                                 ('Copag', 'Contas a pagar'),
-                                 ('Corec', 'Contas a receber'),
-                                 ('Fiscal', 'Fiscal'),
-                                 ('RH', 'Recursos Humanos'),
-                                 ('Contabilidade', 'Contabilidade'),
-                                 ('Tesouraria', 'Tesouraria'),
-                                 ('Diretoria', 'Diretoria'),
-                                 ('Segurança', 'Segurança do Trabalho'),
-                                 ('Controladoria F.', 'Controladoria Financeira'),
+                                 ('TI', 'Tecnologia da Informação'), 
+                                 ('ComGer', 'Compras Gerais'), 
+                                 ('Copag', 'Contas a pagar'), 
+                                 ('Corec', 'Contas a receber'), 
+                                 ('Fiscal', 'Fiscal'), 
+                                 ('RH', 'Recursos Humanos'), 
+                                 ('Contabilidade', 'Contabilidade'), 
+                                 ('Tesouraria', 'Tesouraria'), 
+                                 ('Diretoria', 'Diretoria'), 
+                                 ('Segurança', 'Segurança do Trabalho'), 
+                                 ('Controladoria F.', 'Controladoria Financeira'), 
                                  ('Ambiental', 'Ambiental')
                              ])
     endereco_ip = StringField('Endereço IP', validators=[
