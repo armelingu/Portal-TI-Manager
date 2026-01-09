@@ -150,7 +150,7 @@ class Registro(db.Model):
     endereco_ip = db.Column(db.String(20), nullable=False, unique=True, index=True)
     mac_adress = db.Column(db.String(20), nullable=False, unique=True, index=True)
     hostname = db.Column(db.String(100), nullable=False, index=True)
-    serial_number = db.Column(db.String(50), nullable=False, unique=True, index=True) #serial number da máquina
+    serial_number = db.Column(db.String(50), nullable=True, index=True) #serial number da máquina - campo desabilitado
     memoria_ram = db.Column(db.Integer, nullable=False)
     ssd = db.Column(db.Integer, nullable=False) 
     ramal = db.Column(db.Integer, nullable=False, unique=True) #dados de ramal
@@ -502,11 +502,12 @@ class MaquinaForm(FlaskForm):
         DataRequired(),
         Length(min=3, message="Hostname deve ter pelo menos 3 caracteres.")
     ])
-    serial_number = StringField('Serial Number', validators=[
-        DataRequired(message="Serial Number é obrigatório"),
-        Length(min=3, max=50, message="Serial Number deve ter entre 3 e 50 caracteres"),
-        validate_serial_existente
-    ])
+    # Campo serial_number desabilitado temporariamente
+    # serial_number = StringField('Serial Number', validators=[
+    #     DataRequired(message="Serial Number é obrigatório"),
+    #     Length(min=3, max=50, message="Serial Number deve ter entre 3 e 50 caracteres"),
+    #     validate_serial_existente
+    # ])
     memoria_ram = IntegerField('Memória RAM (GB)', validators=[DataRequired()])
     ssd = IntegerField('SSD (GB)', validators=[DataRequired()])
     ramal = IntegerField('Ramal', validators=[DataRequired()])
@@ -1073,7 +1074,7 @@ def cadastro(tipo_dispositivo):
         
         if form.validate_on_submit():
             app.logger.info("=== FORMULÁRIO VÁLIDO ===")
-            campos_obrigatorios = [form.nome.data, form.endereco_ip.data, form.mac_adress.data, form.serial_number.data]
+            campos_obrigatorios = [form.nome.data, form.endereco_ip.data, form.mac_adress.data]  # serial_number removido
             if not all(campos_obrigatorios):
                 app.logger.warning("Campos obrigatórios faltando")
                 flash('Preencha todos os campos obrigatórios.', 'Warning')
@@ -1089,7 +1090,7 @@ def cadastro(tipo_dispositivo):
                 endereco_ip=form.endereco_ip.data.strip(),  # Remove espaços
                 mac_adress=form.mac_adress.data.upper().replace('-', ':').strip(),  # Padroniza e remove espaços
                 hostname=form.hostname.data.strip(),
-                serial_number=form.serial_number.data.strip().upper(),  # Serial em maiúsculo
+                serial_number=None,  # Campo desabilitado temporariamente
                 memoria_ram=form.memoria_ram.data,
                 ssd=form.ssd.data,
                 ramal=form.ramal.data,
@@ -1402,7 +1403,7 @@ def editar(id):
         form.endereco_ip.data = registro.endereco_ip
         form.mac_adress.data = registro.mac_adress
         form.hostname.data = registro.hostname
-        form.serial_number.data = registro.serial_number
+        # form.serial_number.data = registro.serial_number  # Campo desabilitado
         form.memoria_ram.data = registro.memoria_ram
         form.ssd.data = registro.ssd
         form.ramal.data = registro.ramal
@@ -1438,7 +1439,7 @@ def editar(id):
             registro.endereco_ip = form.endereco_ip.data.strip() # Remove espaços
             registro.mac_adress = form.mac_adress.data.upper().replace('-', ':').strip()
             registro.hostname = form.hostname.data.strip()
-            registro.serial_number = form.serial_number.data.strip().upper()  # Serial em maiúsculo
+            # registro.serial_number = form.serial_number.data.strip().upper()  # Campo desabilitado
             registro.memoria_ram = form.memoria_ram.data
             registro.ssd = form.ssd.data
             registro.ramal = form.ramal.data
