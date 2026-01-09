@@ -1,251 +1,1012 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="mt-2">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-          {% if category == 'success' %}
-            <i class="fas fa-check-circle me-2"></i>
-          {% elif category == 'danger' %}
-            <i class="fas fa-exclamation-circle me-2"></i>
-          {% elif category == 'warning' %}
-            <i class="fas fa-exclamation-triangle me-2"></i>
-          {% elif category == 'info' %}
-            <i class="fas fa-info-circle me-2"></i>
-          {% endif %}
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
-<div class="row align-items-center mb-4">
-    <div class="col-md-6">
-        <form method="GET">
-            <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Pesquisar por nome, departamento, IP..." value="{{ search }}">
-                <button class="btn btn-outline-primary" type="submit">Buscar</button>
+<div class="container-fluid py-4">
+    <!-- Header com Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-white rounded-4 shadow-sm p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1 class="display-6 mb-0">
+                            <i class="fas fa-chart-bar text-warning"></i> {{ titulo }}
+                        </h1>
+                        <p class="text-muted mb-0 mt-2">
+                            Gerencie todos os dispositivos cadastrados no sistema
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="d-inline-flex align-items-center">
+                            <div class="text-center me-4">
+                                <h3 class="mb-0 text-warning">{{ registros.total }}</h3>
+                                <small class="text-muted">Total de Dispositivos</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <a href="{{ url_for('selecionar_tipo_dispositivo') }}" class="btn btn-warning btn-lg">
+                                <i class="fas fa-plus-circle me-2"></i> Novo Cadastro
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 
-    <div class="col-md-6 text-end">
-        <a href="{{ url_for('exportar_csv') }}" class="btn btn-success me-2">
-            <i class="fas fa-file-excel me-2"></i> Exportar CSV
-        </a>
-        <a href="{{ url_for('index') }}" class="btn btn-warning">
-            <i class="fas fa-plus-circle me-2"></i> Novo Cadastro
-        </a>
+    <!-- Mensagens Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="row mb-3">
+                <div class="col-12">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle me-2"></i>
+                            {% elif category == 'danger' %}
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% elif category == 'info' %}
+                                <i class="fas fa-info-circle me-2"></i>
+                            {% endif %}
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Barra de Pesquisa e Ações -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <form method="GET" class="search-form">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Pesquisar por nome, departamento, IP, hostname..." 
+                                   value="{{ search }}">
+                            <!-- Preservar outros parâmetros -->
+                            {% for key, value in request.args.items() if key != 'search' and key != 'page' %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endfor %}
+                            <button class="btn btn-warning" type="submit">
+                                Pesquisar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-outline-secondary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                        <i class="fas fa-filter me-2"></i>Filtros Avançados
+                        <span class="badge bg-warning text-dark ms-2" id="activeFiltersCount">0</span>
+                    </button>
+                    <a href="{{ url_for('exportar_csv', **request.args) }}" class="btn btn-success">
+                        <i class="fas fa-file-excel me-2"></i>Exportar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Avançados -->
+    <div class="collapse mb-4" id="advancedFilters">
+        <div class="card shadow-sm border-warning">
+            <div class="card-header bg-warning bg-opacity-10">
+                <h6 class="mb-0">
+                    <i class="fas fa-sliders-h me-2"></i>Filtros Avançados
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" id="filterForm">
+                    <!-- Preservar busca -->
+                    {% if search %}
+                        <input type="hidden" name="search" value="{{ search }}">
+                    {% endif %}
+                    
+                    <div class="row g-3">
+                        <!-- Primeira Linha de Filtros -->
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Base</label>
+                            <select name="filter_base" class="form-select">
+                                <option value="">Todas as Bases</option>
+                                {% for base in bases %}
+                                    <option value="{{ base }}" {% if filter_base == base %}selected{% endif %}>
+                                        {{ base }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Departamento</label>
+                            <select name="filter_departamento" class="form-select">
+                                <option value="">Todos os Departamentos</option>
+                                {% for dept in departamentos %}
+                                    <option value="{{ dept }}" {% if filter_departamento == dept %}selected{% endif %}>
+                                        {{ dept }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Organização</label>
+                            <select name="filter_organizacao" class="form-select">
+                                <option value="">Todas as Organizações</option>
+                                {% for org in organizacoes %}
+                                    <option value="{{ org }}" {% if filter_organizacao == org %}selected{% endif %}>
+                                        {{ org }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Tipo de Dispositivo</label>
+                            <select name="filter_tipo" class="form-select">
+                                <option value="">Todos os Tipos</option>
+                                <option value="desktop" {% if request.args.get('filter_tipo') == 'desktop' %}selected{% endif %}>Desktop</option>
+                                <option value="notebook" {% if request.args.get('filter_tipo') == 'notebook' %}selected{% endif %}>Notebook</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Segunda Linha de Filtros -->
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Endereço IP</label>
+                            <input type="text" name="filter_ip" class="form-control" 
+                                   placeholder="Ex: 192.168.1.100" value="{{ filter_ip }}">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">MAC Address</label>
+                            <input type="text" name="filter_mac" class="form-control" 
+                                   placeholder="Ex: AA:BB:CC:DD:EE:FF" value="{{ filter_mac }}">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Hostname</label>
+                            <input type="text" name="filter_hostname" class="form-control" 
+                                   placeholder="Ex: PC-001" value="{{ filter_hostname }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12 text-end">
+                            <a href="{{ url_for('relatorio') }}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-times me-2"></i>Limpar Filtros
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-check me-2"></i>Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Dispositivos -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col-12">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Lista de Dispositivos
+                    </h6>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width: 50px;">#</th>
+                            <th>
+                                {% set params = request.args.to_dict() %}
+                                {% set _ = params.update({'sort': 'nome', 'order': 'desc' if sort_by == 'nome' and order == 'asc' else 'asc'}) %}
+                                <a href="{{ url_for('relatorio', **params) }}" 
+                                   class="text-decoration-none text-dark">
+                                    Nome
+                                    {% if sort_by == 'nome' %}
+                                        <i class="fas fa-sort-{{ 'up' if order == 'asc' else 'down' }} text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="text-center">
+                                {% set params = request.args.to_dict() %}
+                                {% set _ = params.update({'sort': 'departamento', 'order': 'desc' if sort_by == 'departamento' and order == 'asc' else 'asc'}) %}
+                                <a href="{{ url_for('relatorio', **params) }}" 
+                                   class="text-decoration-none text-dark">
+                                    Departamento
+                                    {% if sort_by == 'departamento' %}
+                                        <i class="fas fa-sort-{{ 'up' if order == 'asc' else 'down' }} text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="text-center">
+                                {% set params = request.args.to_dict() %}
+                                {% set _ = params.update({'sort': 'organizacao', 'order': 'desc' if sort_by == 'organizacao' and order == 'asc' else 'asc'}) %}
+                                <a href="{{ url_for('relatorio', **params) }}" 
+                                   class="text-decoration-none text-dark">
+                                    Organização
+                                    {% if sort_by == 'organizacao' %}
+                                        <i class="fas fa-sort-{{ 'up' if order == 'asc' else 'down' }} text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="text-center">
+                                {% set params = request.args.to_dict() %}
+                                {% set _ = params.update({'sort': 'tipo_dispositivo', 'order': 'desc' if sort_by == 'tipo_dispositivo' and order == 'asc' else 'asc'}) %}
+                                <a href="{{ url_for('relatorio', **params) }}" 
+                                   class="text-decoration-none text-dark">
+                                    Tipo
+                                    {% if sort_by == 'tipo_dispositivo' %}
+                                        <i class="fas fa-sort-{{ 'up' if order == 'asc' else 'down' }} text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="text-center">IP</th>
+                            <th class="text-center">Hostname</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                        <!-- Linha de Filtros por Coluna -->
+                        <tr class="table-filter">
+                            <th></th>
+                            <th>
+                                <input type="text" class="form-control form-control-sm filter-input w-100" 
+                                       data-filter="filter_nome" placeholder="Filtrar nome..."
+                                       value="{{ filter_nome }}">
+                            </th>
+                            <th class="text-center">
+                                <select class="form-select form-select-sm filter-select mx-auto" style="max-width: 150px;" data-filter="filter_departamento">
+                                    <option value="">Todos</option>
+                                    {% for dept in departamentos %}
+                                        <option value="{{ dept }}" {% if filter_departamento == dept %}selected{% endif %}>
+                                            {{ dept }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th class="text-center">
+                                <select class="form-select form-select-sm filter-select mx-auto" style="max-width: 150px;" data-filter="filter_organizacao">
+                                    <option value="">Todas</option>
+                                    {% for org in organizacoes %}
+                                        <option value="{{ org }}" {% if filter_organizacao == org %}selected{% endif %}>
+                                            {{ org }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                            <th class="text-center">
+                                <select class="form-select form-select-sm filter-select mx-auto" style="max-width: 120px;" data-filter="filter_tipo">
+                                    <option value="">Todos</option>
+                                    <option value="desktop" {% if request.args.get('filter_tipo') == 'desktop' %}selected{% endif %}>Desktop</option>
+                                    <option value="notebook" {% if request.args.get('filter_tipo') == 'notebook' %}selected{% endif %}>Notebook</option>
+                                </select>
+                            </th>
+                            <th class="text-center">
+                                <input type="text" class="form-control form-control-sm filter-input mx-auto" style="max-width: 140px;"
+                                       data-filter="filter_ip" placeholder="Filtrar IP..."
+                                       value="{{ filter_ip }}">
+                            </th>
+                            <th class="text-center">
+                                <input type="text" class="form-control form-control-sm filter-input mx-auto" style="max-width: 140px;"
+                                       data-filter="filter_hostname" placeholder="Filtrar..."
+                                       value="{{ filter_hostname }}">
+                            </th>
+                            <th class="text-center">
+                                <select class="form-select form-select-sm filter-select mx-auto" style="max-width: 130px;" data-filter="filter_status">
+                                    <option value="">Todos</option>
+                                    <option value="ATIVO" {% if request.args.get('filter_status') == 'ATIVO' %}selected{% endif %}>Ativo</option>
+                                    <option value="INATIVO" {% if request.args.get('filter_status') == 'INATIVO' %}selected{% endif %}>Inativo</option>
+                                    <option value="MANUTENCAO" {% if request.args.get('filter_status') == 'MANUTENCAO' %}selected{% endif %}>Manutenção</option>
+                                    <option value="DESCARTADO" {% if request.args.get('filter_status') == 'DESCARTADO' %}selected{% endif %}>Descartado</option>
+                                </select>
+                            </th>
+                            <th class="text-center">
+                                <button class="btn btn-sm btn-warning" onclick="applyColumnFilters()" title="Aplicar Filtros">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="clearColumnFilters()" title="Limpar Filtros">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if registros.items %}
+                            {% for registro in registros.items %}
+                                <tr>
+                                    <td class="text-center align-middle">
+                                        <span class="badge bg-secondary">{{ loop.index + (page - 1) * per_page }}</span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-warning bg-opacity-10 rounded-circle me-2">
+                                                <i class="fas fa-user text-warning p-2"></i>
+                                            </div>
+                                            <div>
+                                                <strong>{{ registro.nome }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ registro.base }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="d-flex justify-content-center">
+                                            <span class="badge bg-info bg-opacity-10 text-dark">
+                                                {{ registro.departamento }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="d-flex justify-content-center">
+                                            <span class="badge bg-secondary bg-opacity-10 text-dark">
+                                                {{ registro.organizacao.nome_organizacao if registro.organizacao else 'N/A' }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="d-flex justify-content-center">
+                                            <span class="badge bg-primary bg-opacity-10 text-dark">
+                                                <i class="fas fa-{{ 'laptop' if registro.tipo_dispositivo == 'notebook' else 'desktop' }} me-1"></i>
+                                                {{ registro.tipo_dispositivo.title() }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <code>{{ registro.endereco_ip }}</code>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <small>{{ registro.hostname }}</small>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="d-flex justify-content-center">
+                                            {% if registro.status_ativo %}
+                                                {% if registro.status_ativo == 'ATIVO' %}
+                                                    <span class="badge bg-success">Ativo</span>
+                                                {% elif registro.status_ativo == 'INATIVO' %}
+                                                    <span class="badge bg-secondary">Inativo</span>
+                                                {% elif registro.status_ativo == 'MANUTENCAO' %}
+                                                    <span class="badge bg-warning">Manutenção</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Descartado</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-light text-dark">N/A</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    data-bs-toggle="tooltip" title="Ver Detalhes"
+                                                    onclick="showDetails({{ registro.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <a href="{{ url_for('editar', id=registro.id) }}" 
+                                               class="btn btn-sm btn-outline-warning"
+                                               data-bs-toggle="tooltip" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal{{ registro.id }}"
+                                                    data-bs-toggle="tooltip" title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Modal de Exclusão -->
+                                <div class="modal fade" id="deleteModal{{ registro.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Tem certeza que deseja excluir o dispositivo:</p>
+                                                <p class="fw-bold">{{ registro.nome }} - {{ registro.hostname }}</p>
+                                                <p class="text-danger">Esta ação não pode ser desfeita!</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Cancelar
+                                                </button>
+                                                <a href="{{ url_for('excluir', id=registro.id) }}" class="btn btn-danger">
+                                                    <i class="fas fa-trash me-2"></i>Excluir
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <p>Nenhum dispositivo encontrado</p>
+                                        <a href="{{ url_for('selecionar_tipo_dispositivo') }}" class="btn btn-warning">
+                                            <i class="fas fa-plus-circle me-2"></i>Cadastrar Primeiro Dispositivo
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Paginação e Informações -->
+        <div class="card-footer bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Mostrando <strong>{{ registros.items|length }}</strong> de <strong>{{ registros.total }}</strong> registros
+                    </small>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <label for="perPageSelect" class="me-2 small text-muted">Itens por página:</label>
+                        <select id="perPageSelect" class="form-select form-select-sm w-auto" onchange="changePerPage(this.value)">
+                            {% for option in per_page_options %}
+                                <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>
+                                    {{ option }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    {% if registros.pages > 1 %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination pagination-sm justify-content-end mb-0">
+                        <!-- Primeira página -->
+                        <li class="page-item {% if not registros.has_prev %}disabled{% endif %}">
+                            {% set params = request.args.to_dict() %}
+                            {% set _ = params.update({'page': 1}) %}
+                            <a class="page-link" href="{{ url_for('relatorio', **params) }}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Página anterior -->
+                        <li class="page-item {% if not registros.has_prev %}disabled{% endif %}">
+                            {% set params = request.args.to_dict() %}
+                            {% set _ = params.update({'page': registros.prev_num if registros.has_prev else page}) %}
+                            <a class="page-link" href="{{ url_for('relatorio', **params) }}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Páginas numeradas -->
+                        {% for p in registros.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if p %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    {% set params = request.args.to_dict() %}
+                                    {% set _ = params.update({'page': p}) %}
+                                    <a class="page-link" href="{{ url_for('relatorio', **params) }}">{{ p }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Próxima página -->
+                        <li class="page-item {% if not registros.has_next %}disabled{% endif %}">
+                            {% set params = request.args.to_dict() %}
+                            {% set _ = params.update({'page': registros.next_num if registros.has_next else page}) %}
+                            <a class="page-link" href="{{ url_for('relatorio', **params) }}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Última página -->
+                        <li class="page-item {% if not registros.has_next %}disabled{% endif %}">
+                            {% set params = request.args.to_dict() %}
+                            {% set _ = params.update({'page': registros.pages}) %}
+                            <a class="page-link" href="{{ url_for('relatorio', **params) }}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-    
-    {% if registros.items %}
-    <div class="table-responsive rounded-4 shadow-sm border">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Base</th>
-                    <th class="p-0">
-                        <a href="{{ url_for('relatorio', sort_by='nome', order='asc' if sort_by != 'nome' or order == 'desc' else 'desc', search=search) }}"
-                           class="d-block px-3 py-2 text-dark text-decoration-none w-100 h-100">
-                            Nome
-                            {% if sort_by == 'nome' %}
-                                <i class="fas fa-chevron-{{ 'up' if order == 'asc' else 'down' }} small text-muted ms-1"></i>
-                            {% else %}
-                                <i class="fas fa-sort small text-muted ms-1"></i>
-                            {% endif %}
-                        </a>
-                    </th>
-                    <th>Departamento</th>
-                    <th>IP</th>
-                    <th>MAC</th>
-                    <th class="d-none d-md-table-cell">Hostname</th>
-                    <th class="d-none d-md-table-cell">RAM</th>
-                    <th class="d-none d-md-table-cell">SSD</th>
-                    <th>Ramal</th>
-                    <th class="d-none d-md-table-cell">Anydesk</th>
-                    <th class="text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for registro in registros.items %}
-                <tr>
-                    <td>{{ registro.base }}</td>
-                    <td>{{ registro.nome }}</td>
-                    <td>{{ registro.departamento }}</td>
-                    <td>{{ registro.endereco_ip }}</td>
-                    <td>{{ registro.mac_adress }}</td>
-                    <td class="d-none d-md-table-cell">{{ registro.hostname }}</td>
-                    <td class="d-none d-md-table-cell">{{ registro.memoria_ram }} GB</td>
-                    <td class="d-none d-md-table-cell">{{ registro.ssd }} GB</td>
-                    <td>{{ registro.ramal }}</td>
-                    <td class="d-none d-md-table-cell">{{ registro.anydesk }}</td>
-                    <td class="text-center">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Ações
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('editar', id=registro.id) }}">
-                                        <i class="fas fa-edit me-2 text-warning"></i> Editar
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#" onclick="confirmarExclusao('{{ registro.id }}')">
-                                        <i class="fas fa-trash me-2"></i> Excluir
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>    
-    
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4">
-        <div class="mb-3 mb-md-0 text-muted small">
-            Mostrando <strong>{{ registros.items|length }}</strong> de <strong>{{ registros.total }}</strong> registros
+
+<!-- Modal de Detalhes (será preenchido via JavaScript) -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <div class="w-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="modal-title mb-0">
+                            <i class="fas fa-info-circle text-warning me-2"></i>Detalhes do Dispositivo
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body pt-2" id="detailsContent">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+            </div>
         </div>
-    
-        <nav aria-label="Paginação de registros">
-            {{ pagination.links | safe }}
-        </nav>
     </div>
-    
-    {% else %}
-    <div class="text-center my-5">
-        <i class="fas fa-database fa-3x mb-3 text-secondary"></i>
-        <h4 class="mb-3">Nenhum registro encontrado</h4>
-        <p class="text-muted">Ainda não há máquinas cadastradas. Clique abaixo para adicionar a primeira!</p>
-        <a href="{{ url_for('index') }}" class="btn btn-warning mt-3">
-            <i class="fas fa-plus-circle me-2"></i> Novo Cadastro
-        </a>
-    </div>    
-    {% endif %}
 </div>
 
 <style>
-:root {
-    --primary-color: #FEA30B;
-    --secondary-color: #343a40;
-    --light-bg: #f8f9fa;
-    --hover-color: #e09000;
-    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-}
-
-.content-container {
-    background-color: white;
-    border-radius: 15px;
-    padding: 40px;
-    margin-top: 40px;
-    margin-bottom: 40px;
-    box-shadow: var(--box-shadow);
-    border-top: 5px solid var(--primary-color);
-}
-
-.page-title {
-    color: var(--secondary-color);
-    font-family: 'Oswald', sans-serif;
-    font-weight: 600;
-    margin-bottom: 30px;
-    position: relative;
-    padding-bottom: 15px;
-}
-
-.page-title:after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 4px;
-    width: 60px;
-    background-color: var(--primary-color);
-}
-
-.search-container {
-    position: relative;
-    margin-bottom: 25px;
-}
-
-.search-icon {
-    position: absolute;
-    left: 15px;
-    top: 12px;
-    color: #6c757d;
-}
-
-.search-input {
-    padding-left: 40px;
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.search-input:focus {
-    box-shadow: 0 0 0 0.25rem rgba(254, 163, 11, 0.25);
-    border-color: var(--primary-color);
-}
-
-.table {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.table thead {
-    background-color: var(--light-bg);
-}
-
-.table thead th {
-    font-weight: bold;
-    color: var(--secondary-color);
-    cursor: pointer;
-}
-
-.table thead th:hover {
-    background-color: #e9ecef;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(254, 163, 11, 0.05);
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.status-bar {
-    margin-top: 20px;
-    background-color: var(--light-bg);
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-}
-
-.no-data {
-    padding: 40px;
-    text-align: center;
-    color: #6c757d;
-}
+    .card {
+        border: none;
+        transition: transform 0.2s;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(254, 163, 11, 0.05);
+        cursor: pointer;
+    }
+    
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .page-link {
+        color: #FEA30B;
+        border-color: #dee2e6;
+    }
+    
+    .page-link:hover {
+        background-color: #FEA30B;
+        color: white;
+        border-color: #FEA30B;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #FEA30B;
+        border-color: #FEA30B;
+    }
+    
+    code {
+        background-color: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #495057;
+    }
+    
+    .vr {
+        width: 1px;
+        background-color: #dee2e6;
+        height: 40px;
+    }
+    
+    .card-footer {
+        border-top: 2px solid #f8f9fa;
+    }
+    
+    .pagination-sm .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    @media (max-width: 768px) {
+        .card-footer .row > div {
+            margin-bottom: 0.5rem;
+            text-align: center !important;
+        }
+        
+        .card-footer .pagination {
+            justify-content: center !important;
+        }
+    }
+    
+    .table-filter th {
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .filter-input, .filter-select {
+        font-size: 0.875rem;
+    }
+    
+    .table-filter .btn {
+        padding: 0.25rem 0.5rem;
+        margin: 0 2px;
+    }
+    
+    /* Centralizar conteúdo das células */
+    .table td {
+        vertical-align: middle;
+    }
+    
+    /* Garantir que badges fiquem centralizados */
+    .table td.text-center .badge {
+        display: inline-block;
+        margin: 0 auto;
+    }
+    
+    /* Ajustar largura mínima para colunas */
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        min-width: 120px;
+    }
+    
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        min-width: 120px;
+    }
+    
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        min-width: 100px;
+    }
+    
+    /* Estilos para o modal de detalhes */
+    #detailsModal .modal-header {
+        padding: 1rem 1.5rem 0.5rem;
+    }
+    
+    #detailsModal .modal-body {
+        padding: 0.5rem 1.5rem 1rem;
+    }
+    
+    #detailsModal .modal-footer {
+        padding: 0.5rem 1.5rem 1rem;
+    }
+    
+    #detailsModal .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    #detailsModal code {
+        background-color: #e9ecef;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 0.875rem;
+    }
+    
+    #detailsModal .fw-semibold {
+        font-weight: 600;
+    }
+    
+    #detailsModal h6 {
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    
+    #detailsModal h5 {
+        font-size: 1.1rem;
+        color: #333;
+    }
+    
+    #detailsModal .border-bottom {
+        border-color: #dee2e6 !important;
+    }
+    
+    #detailsModal .border-top {
+        border-color: #dee2e6 !important;
+    }
 </style>
+
+<script>
+// Função para mudar itens por página
+function changePerPage(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', value);
+    url.searchParams.delete('page'); // Reset para primeira página
+    window.location.href = url.toString();
+}
+
+// Função para aplicar filtros por coluna
+function applyColumnFilters() {
+    const url = new URL(window.location.href);
+    
+    // Coletar todos os filtros
+    document.querySelectorAll('.filter-input, .filter-select').forEach(input => {
+        const filterName = input.getAttribute('data-filter');
+        const value = input.value.trim();
+        
+        if (value) {
+            url.searchParams.set(filterName, value);
+        } else {
+            url.searchParams.delete(filterName);
+        }
+    });
+    
+    // Reset para primeira página ao aplicar filtros
+    url.searchParams.delete('page');
+    
+    window.location.href = url.toString();
+}
+
+// Função para limpar filtros por coluna
+function clearColumnFilters() {
+    const url = new URL(window.location.href);
+    
+    // Remover todos os filtros de coluna
+    const columnFilters = ['filter_nome', 'filter_departamento', 'filter_organizacao', 
+                          'filter_tipo', 'filter_ip', 'filter_hostname', 'filter_status'];
+    
+    columnFilters.forEach(filter => {
+        url.searchParams.delete(filter);
+    });
+    
+    // Reset para primeira página
+    url.searchParams.delete('page');
+    
+    window.location.href = url.toString();
+}
+
+// Aplicar filtros ao pressionar Enter
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.filter-input').forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyColumnFilters();
+            }
+        });
+    });
+    
+    // Aplicar filtros ao mudar select
+    document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('change', function() {
+            applyColumnFilters();
+        });
+    });
+});
+
+// Contador de filtros ativos
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInputs = document.querySelectorAll('#filterForm input[type="text"], #filterForm select');
+    let activeFilters = 0;
+    
+    filterInputs.forEach(input => {
+        if (input.value && input.name !== 'per_page' && input.name !== 'search') {
+            activeFilters++;
+        }
+    });
+    
+    document.getElementById('activeFiltersCount').textContent = activeFilters;
+    
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+});
+
+// Função para mostrar detalhes
+function showDetails(id) {
+    const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+    const contentDiv = document.getElementById('detailsContent');
+    
+    // Mostrar loading
+    contentDiv.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-warning" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-3">Carregando detalhes do dispositivo...</p>
+        </div>
+    `;
+    modal.show();
+    
+    // Buscar dados via AJAX
+    fetch(`/api/dispositivo/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            let statusBadge = '';
+            if (data.status_ativo === 'ATIVO') {
+                statusBadge = '<span class="badge bg-success">Ativo</span>';
+            } else if (data.status_ativo === 'INATIVO') {
+                statusBadge = '<span class="badge bg-secondary">Inativo</span>';
+            } else if (data.status_ativo === 'MANUTENCAO') {
+                statusBadge = '<span class="badge bg-warning text-dark">Manutenção</span>';
+            } else if (data.status_ativo === 'DESCARTADO') {
+                statusBadge = '<span class="badge bg-danger">Descartado</span>';
+            }
+            
+            let financialInfo = '';
+            if (data.valor_aquisicao && data.valor_aquisicao > 0) {
+                financialInfo = `
+                    <div class="col-12 mt-3">
+                        <div class="border-top pt-3">
+                            <h6 class="text-warning mb-3">
+                                <i class="fas fa-coins me-2"></i>Informações Financeiras
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Valor de Aquisição:</small>
+                                        <div class="fw-bold">R$ ${data.valor_aquisicao.toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Data de Aquisição:</small>
+                                        <div>${data.data_aquisicao || 'N/A'}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Fornecedor:</small>
+                                        <div>${data.fornecedor || 'N/A'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted">Valor Residual:</small>
+                                        <div class="fw-bold text-success">R$ ${(data.depreciacao_info?.valor_residual || 0).toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Depreciação Acumulada:</small>
+                                        <div class="text-danger">R$ ${(data.depreciacao_info?.depreciacao_acumulada || 0).toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Idade do Equipamento:</small>
+                                        <div>${(data.depreciacao_info?.idade_anos || 0).toFixed(1)} anos</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            contentDiv.innerHTML = `
+                <div class="container-fluid px-0">
+                    <!-- Cabeçalho com nome e status -->
+                    <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom">
+                        <div>
+                            <h5 class="mb-1">${data.nome}</h5>
+                            <small class="text-muted">${data.hostname} - ${data.tipo_dispositivo}</small>
+                        </div>
+                        <div class="text-end">
+                            ${statusBadge}
+                        </div>
+                    </div>
+                    
+                    <!-- Informações em grid -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="bg-light rounded-3 p-3">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Informações Básicas
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">Base:</small>
+                                    <div class="fw-semibold">${data.base}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Departamento:</small>
+                                    <div class="fw-semibold">${data.departamento}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Organização:</small>
+                                    <div class="fw-semibold">${data.organizacao || 'N/A'}</div>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted">Serial Number:</small>
+                                    <div class="fw-semibold font-monospace">${data.serial_number}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="bg-light rounded-3 p-3">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-network-wired me-2"></i>Rede e Acesso
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">IP:</small>
+                                    <div class="fw-semibold"><code class="text-dark">${data.endereco_ip}</code></div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">MAC:</small>
+                                    <div class="fw-semibold"><code class="text-dark">${data.mac_adress}</code></div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Ramal:</small>
+                                    <div class="fw-semibold">${data.ramal}</div>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted">AnyDesk:</small>
+                                    <div class="fw-semibold">${data.anydesk}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="bg-light rounded-3 p-3">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-microchip me-2"></i>Hardware
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">RAM:</small>
+                                    <div class="fw-semibold">${data.memoria_ram} GB</div>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted">SSD:</small>
+                                    <div class="fw-semibold">${data.ssd} GB</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="bg-light rounded-3 p-3">
+                                <h6 class="text-warning mb-3">
+                                    <i class="fas fa-clock me-2"></i>Registro
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">Cadastrado em:</small>
+                                    <div class="fw-semibold">${data.data_cadastro}</div>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted">Última atualização:</small>
+                                    <div class="fw-semibold">${data.ultima_atualizacao}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${financialInfo}
+                    </div>
+                </div>
+                
+                <div class="text-end mt-4 pt-3 border-top">
+                    <a href="/editar/${data.id}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>Editar Dispositivo
+                    </a>
+                </div>
+            `;
+        })
+        .catch(error => {
+            contentDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Erro ao carregar detalhes do dispositivo.
+                </div>
+            `;
+        });
+}
+</script>
 {% endblock %}

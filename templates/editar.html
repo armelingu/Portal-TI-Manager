@@ -1,159 +1,558 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ titulo }}</h2>
-    
-    <form method="POST" class="needs-validation" novalidate>
-        {{ form.csrf_token }}
-
-        <div class="row g-3"> <!-- campo BASE-->
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.base.label(class="form-label") }}
-                    {{ form.base(class="form-control" + (" is-invalid" if form.base.errors else "")) }}
-                    {% if form.base.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.base.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>  
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.nome.label(class="form-label") }}
-                    {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else "")) }}
-                    {% if form.nome.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.nome.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.departamento.label(class="form-label") }}
-                    {{ form.departamento(class="form-select" + (" is-invalid" if form.departamento.errors else "")) }}
-                    {% if form.departamento.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.departamento.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.endereco_ip.label(class="form-label") }}
-                    {{ form.endereco_ip(class="form-control" + (" is-invalid" if form.endereco_ip.errors else "")) }}
-                    {% if form.endereco_ip.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.endereco_ip.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ form.mac_adress.label(class="form-label") }}
-                    {{ form.mac_adress(class="form-control" + (" is-invalid" if form.mac_adress.errors else "")) }}
-                    {% if form.mac_adress.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.mac_adress.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ form.hostname.label(class="form-label") }}
-                    {{ form.hostname(class="form-control" + (" is-invalid" if form.hostname.errors else "")) }}
-                    {% if form.hostname.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.hostname.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ form.memoria_ram.label(class="form-label") }}
-                    {{ form.memoria_ram(class="form-control" + (" is-invalid" if form.memoria_ram.errors else "")) }}
-                    {% if form.memoria_ram.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.memoria_ram.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ form.ssd.label(class="form-label") }}
-                    {{ form.ssd(class="form-control" + (" is-invalid" if form.ssd.errors else "")) }}
-                    {% if form.ssd.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.ssd.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ form.ramal.label(class="form-label") }}
-                    {{ form.ramal(class="form-control" + (" is-invalid" if form.ramal.errors else "")) }}
-                    {% if form.ramal.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.ramal.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 mb-0">
+                            <i class="fas fa-edit text-warning"></i> {{ titulo }}
+                        </h1>
+                        <p class="text-muted mb-0 mt-2">
+                            <i class="fas fa-desktop"></i> {{ registro.hostname }} - {{ registro.nome }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <span class="badge bg-warning text-dark fs-6">
+                            <i class="fas fa-tag"></i> {{ registro.tipo_dispositivo.title() }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="form-group">
-                    {{ form.anydesk.label(class="form-label") }}
-                    {{ form.anydesk(class="form-control" + (" is-invalid" if form.anydesk.errors else "")) }}
-                    {% if form.anydesk.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.anydesk.errors %}
-                                {{ error }}
-                            {% endfor %}
+            <form method="POST" class="needs-validation" novalidate>
+                {{ form.csrf_token }}
+
+                <!-- Card de Informações Básicas -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle text-warning"></i> Informações Básicas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.base.label(class="form-label fw-bold") }}
+                                    {{ form.base(class="form-select" + (" is-invalid" if form.base.errors else "")) }}
+                                    {% if form.base.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.base.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.tipo_dispositivo.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-laptop"></i></span>
+                                        {{ form.tipo_dispositivo(class="form-control" + (" is-invalid" if form.tipo_dispositivo.errors else "")) }}
+                                    </div>
+                                    {% if form.tipo_dispositivo.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.tipo_dispositivo.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">Altere entre Desktop ou Notebook</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.nome.label(class="form-label fw-bold") }}
+                                    {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else "")) }}
+                                    {% if form.nome.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.nome.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.departamento.label(class="form-label fw-bold") }}
+                                    {{ form.departamento(class="form-select" + (" is-invalid" if form.departamento.errors else "")) }}
+                                    {% if form.departamento.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.departamento.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.organizacao.label(class="form-label fw-bold") }}
+                                    {{ form.organizacao(class="form-select" + (" is-invalid" if form.organizacao.errors else "")) }}
+                                    {% if form.organizacao.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.organizacao.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Campo Confirmação Onedrive pessoal -->
+                             <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.onedrive_pessoal.label(class="form-label fw-bold") }}
+                                    {{ form.onedrive_pessoal(class="form-select" + (" is-invalid" if form.onedrive_pessoal.errors else "")) }}
+                                    {% if form.onedrive_pessoal.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.onedrive_pessoal.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                             </div>    
                         </div>
+                    </div>
+                </div>
+
+                <!-- Card de Configurações de Rede -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-network-wired text-warning"></i> Configurações de Rede
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.endereco_ip.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                        {{ form.endereco_ip(class="form-control" + (" is-invalid" if form.endereco_ip.errors else "")) }}
+                                    </div>
+                                    {% if form.endereco_ip.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.endereco_ip.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.mac_adress.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-ethernet"></i></span>
+                                        {{ form.mac_adress(class="form-control" + (" is-invalid" if form.mac_adress.errors else "")) }}
+                                    </div>
+                                    {% if form.mac_adress.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.mac_adress.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.hostname.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-server"></i></span>
+                                        {{ form.hostname(class="form-control" + (" is-invalid" if form.hostname.errors else "")) }}
+                                    </div>
+                                    {% if form.hostname.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.hostname.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Especificações Técnicas -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-microchip text-warning"></i> Especificações Técnicas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    {{ form.serial_number.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                        {{ form.serial_number(class="form-control" + (" is-invalid" if form.serial_number.errors else "")) }}
+                                    </div>
+                                    {% if form.serial_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.serial_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    {{ form.memoria_ram.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-memory"></i></span>
+                                        {{ form.memoria_ram(class="form-control" + (" is-invalid" if form.memoria_ram.errors else "")) }}
+                                        <span class="input-group-text">GB</span>
+                                    </div>
+                                    {% if form.memoria_ram.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.memoria_ram.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    {{ form.ssd.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-hdd"></i></span>
+                                        {{ form.ssd(class="form-control" + (" is-invalid" if form.ssd.errors else "")) }}
+                                        <span class="input-group-text">GB</span>
+                                    </div>
+                                    {% if form.ssd.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.ssd.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    {{ form.ramal.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        {{ form.ramal(class="form-control" + (" is-invalid" if form.ramal.errors else "")) }}
+                                    </div>
+                                    {% if form.ramal.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.ramal.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    {{ form.anydesk.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-desktop"></i></span>
+                                        {{ form.anydesk(class="form-control" + (" is-invalid" if form.anydesk.errors else "")) }}
+                                    </div>
+                                    {% if form.anydesk.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.anydesk.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção Financeira -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center py-4">
+                        <h5 class="text-muted mb-3">Informações Financeiras e Patrimoniais</h5>
+                        {% if registro.valor_aquisicao %}
+                            <div class="alert alert-info d-inline-block">
+                                <i class="fas fa-check-circle"></i> Este dispositivo possui informações financeiras cadastradas
+                            </div>
+                            <br>
+                        {% endif %}
+                        <button type="button" class="btn btn-outline-warning btn-lg mt-2" data-bs-toggle="modal" data-bs-target="#modalFinanceiroEdicao">
+                            <i class="fas fa-coins me-2"></i> 
+                            {% if registro.valor_aquisicao %}
+                                Editar Informações Financeiras
+                            {% else %}
+                                Adicionar Informações Financeiras
+                            {% endif %}
+                            <i class="fas fa-chevron-down ms-2"></i>
+                        </button>
+                        <p class="text-muted mt-2">
+                            <small><i class="fas fa-info-circle"></i> Opcional - Gerencie dados patrimoniais e de depreciação</small>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-warning px-4 py-2 me-2">
+                        <i class="fas fa-save me-2"></i> Salvar Alterações
+                    </button>
+                    <a href="{{ url_for('relatorio') }}" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="fas fa-times me-2"></i> Cancelar
+                    </a>
+                </div>
+                
+                <!-- Modal de Informações Financeiras -->
+<div class="modal fade" id="modalFinanceiroEdicao" tabindex="-1" aria-labelledby="modalFinanceiroEdicaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFinanceiroEdicaoLabel">
+                    <i class="fas fa-coins me-2"></i> Informações Financeiras e Patrimoniais
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Status Atual se houver dados -->
+                    {% if registro.valor_aquisicao %}
+                    <div class="alert alert-success mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="mb-0"><i class="fas fa-chart-line"></i> Resumo Financeiro Atual</h6>
+                                <small>
+                                    Valor: <strong>R$ {{ "%.2f"|format(registro.valor_aquisicao) }}</strong> | 
+                                    Aquisição: <strong>{{ registro.data_aquisicao.strftime('%d/%m/%Y') if registro.data_aquisicao else 'N/A' }}</strong> |
+                                    Status: <strong>{{ registro.status_ativo }}</strong>
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                {% if registro.calcular_depreciacao %}
+                                    {% set dep_info = registro.calcular_depreciacao() %}
+                                    <small class="text-muted">
+                                        Valor Residual: <strong>R$ {{ "%.2f"|format(dep_info.valor_residual) }}</strong>
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
+
+                    <!-- Seção de Aquisição -->
+                    <div class="financial-section">
+                        <div class="text-center financial-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <h6 class="text-center mb-3">Dados de Aquisição</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.valor_aquisicao.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white">R$</span>
+                                        {{ form.valor_aquisicao(class="form-control", placeholder="0,00") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.data_aquisicao.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-calendar"></i></span>
+                                        {{ form.data_aquisicao(class="form-control", type="date") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.fornecedor.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-store"></i></span>
+                                        {{ form.fornecedor(class="form-control", placeholder="Ex.: Dell, Lenovo, HP") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção de Depreciação -->
+                    <div class="financial-section">
+                        <div class="text-center financial-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h6 class="text-center mb-3">Configurações de Depreciação</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.vida_util_anos.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-clock"></i></span>
+                                        {{ form.vida_util_anos(class="form-control") }}
+                                        <span class="input-group-text">anos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.taxa_depreciacao.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-percentage"></i></span>
+                                        {{ form.taxa_depreciacao(class="form-control") }}
+                                        <span class="input-group-text">% ao ano</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.status_ativo.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-info-circle"></i></span>
+                                        {{ form.status_ativo(class="form-control") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção de Controle -->
+                    <div class="financial-section">
+                        <div class="text-center financial-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h6 class="text-center mb-3">Controle Administrativo</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.numero_nota_fiscal.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-file-invoice"></i></span>
+                                        {{ form.numero_nota_fiscal(class="form-control", placeholder="Ex.: 123456") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.categoria_financeira.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-tag"></i></span>
+                                        {{ form.categoria_financeira(class="form-control") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.centro_custo.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-warning text-white"><i class="fas fa-sitemap"></i></span>
+                                        {{ form.centro_custo(class="form-control") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Dica:</strong> Manter as informações financeiras atualizadas permite um melhor controle patrimonial e planejamento de substituições.
+                    </div>
                 </div>
             </div>
-
-        </div> <!-- fecha row -->
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-            <a href="{{ url_for('relatorio') }}" class="btn btn-secondary">Cancelar</a>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Fechar
+                </button>
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-2"></i> Confirmar
+                </button>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        border-bottom: 2px solid #FEA30B;
+    }
+    
+    .form-label {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    /* Modal Styles */
+    .modal-header {
+        background: linear-gradient(135deg, #FEA30B 0%, #ff8c00 100%);
+        color: white;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+    }
+    
+    .financial-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .financial-icon {
+        font-size: 24px;
+        color: #FEA30B;
+        margin-bottom: 10px;
+    }
+    
+    .btn-outline-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(254, 163, 11, 0.3);
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    .shadow-sm {
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+</style>
 {% endblock %}

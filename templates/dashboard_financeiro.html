@@ -1,0 +1,693 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-white rounded-4 shadow-sm p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 mb-0">
+                            <i class="fas fa-chart-line text-warning"></i> {{ titulo }}
+                        </h1>
+                        <p class="text-muted mb-0 mt-2">
+                            Análise completa do patrimônio e investimentos em TI
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-outline-secondary" onclick="window.print()">
+                                <i class="fas fa-print me-2"></i>Imprimir
+                            </button>
+                            <button class="btn btn-warning" onclick="exportarRelatorio()">
+                                <i class="fas fa-download me-2"></i>Exportar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Valor Total de Aquisição
+                            </h6>
+                            <h3 class="mb-0 fw-bold text-primary">{{ formatar_moeda(stats.totais.valor_aquisicao) }}</h3>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-coins me-1"></i>
+                                Investimento total
+                            </p>
+                        </div>
+                        <div class="icon-box bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-dollar-sign fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Valor Residual Total
+                            </h6>
+                            <h3 class="mb-0 fw-bold text-success">{{ formatar_moeda(stats.totais.valor_residual) }}</h3>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-hand-holding-usd me-1"></i>
+                                Valor contábil atual
+                            </p>
+                        </div>
+                        <div class="icon-box bg-success bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-chart-line fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Depreciação Acumulada
+                            </h6>
+                            <h3 class="mb-0 fw-bold text-warning">{{ formatar_moeda(stats.totais.depreciacao_total) }}</h3>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Total depreciado
+                            </p>
+                        </div>
+                        <div class="icon-box bg-warning bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-percentage fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Ativos Obsoletos
+                            </h6>
+                            <h3 class="mb-0 fw-bold text-danger">{{ stats.totais.obsoletos_total }}</h3>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Necessitam substituição
+                            </p>
+                        </div>
+                        <div class="icon-box bg-danger bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                    {% if stats.totais.obsoletos_total > 0 %}
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-danger" style="width: 100%"></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs modernizadas -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-4">
+            <ul class="nav nav-tabs border-0" id="dashboardTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="visao-geral-tab" data-bs-toggle="tab" data-bs-target="#visao-geral" type="button">
+                        <i class="fas fa-chart-pie me-2"></i>Visão Geral
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="por-tipo-tab" data-bs-toggle="tab" data-bs-target="#por-tipo" type="button">
+                        <i class="fas fa-laptop me-2"></i>Por Tipo
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="por-departamento-tab" data-bs-toggle="tab" data-bs-target="#por-departamento" type="button">
+                        <i class="fas fa-building me-2"></i>Por Departamento
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="substituicoes-tab" data-bs-toggle="tab" data-bs-target="#substituicoes" type="button">
+                        <i class="fas fa-sync-alt me-2"></i>Substituições
+                        {% if previsoes|length > 0 %}
+                        <span class="badge bg-danger ms-1">{{ previsoes|length }}</span>
+                        {% endif %}
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body">
+            <div class="tab-content" id="dashboardTabsContent">
+                <!-- Tab Visão Geral -->
+                <div class="tab-pane fade show active" id="visao-geral" role="tabpanel">
+                    <div class="row g-4">
+                        <!-- Desktop/Notebook -->
+                        <div class="col-lg-6">
+                            <div class="overview-card bg-light rounded-3 p-4 h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-desktop text-primary me-2"></i>
+                                        Desktop/Notebook
+                                    </h5>
+                                    <span class="badge bg-primary">{{ stats.desktop_notebook.total }} dispositivos</span>
+                                </div>
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Valor Total</small>
+                                            <strong class="text-primary">{{ formatar_moeda(stats.desktop_notebook.valor_total) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Valor Médio</small>
+                                            <strong>{{ formatar_moeda(stats.desktop_notebook.valor_medio) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Depreciação</small>
+                                            <strong class="text-warning">{{ formatar_moeda(stats.desktop_notebook.depreciacao_acumulada) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Valor Residual</small>
+                                            <strong class="text-success">{{ formatar_moeda(stats.desktop_notebook.valor_residual_total) }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="text-muted mb-3">Status dos Ativos</h6>
+                                <div class="status-bars">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="status-label">Ativos</span>
+                                        <div class="progress flex-grow-1 ms-3">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: {{ (stats.desktop_notebook.status.ativos / stats.desktop_notebook.total * 100) if stats.desktop_notebook.total > 0 else 0 }}%">
+                                                {{ stats.desktop_notebook.status.ativos }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="status-label">Manutenção</span>
+                                        <div class="progress flex-grow-1 ms-3">
+                                            <div class="progress-bar bg-warning" 
+                                                 style="width: {{ (stats.desktop_notebook.status.manutencao / stats.desktop_notebook.total * 100) if stats.desktop_notebook.total > 0 else 0 }}%">
+                                                {{ stats.desktop_notebook.status.manutencao }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-label">Inativos</span>
+                                        <div class="progress flex-grow-1 ms-3">
+                                            <div class="progress-bar bg-danger" 
+                                                 style="width: {{ (stats.desktop_notebook.status.inativos / stats.desktop_notebook.total * 100) if stats.desktop_notebook.total > 0 else 0 }}%">
+                                                {{ stats.desktop_notebook.status.inativos }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if stats.desktop_notebook.obsoletos > 0 %}
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>{{ stats.desktop_notebook.obsoletos }}</strong> dispositivos obsoletos
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Dispositivos Móveis -->
+                        <div class="col-lg-6">
+                            <div class="overview-card bg-light rounded-3 p-4 h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-mobile-alt text-info me-2"></i>
+                                        Dispositivos Móveis
+                                    </h5>
+                                    <span class="badge bg-info">{{ stats.dispositivos_moveis.total }} dispositivos</span>
+                                </div>
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Valor Total</small>
+                                            <strong class="text-primary">{{ formatar_moeda(stats.dispositivos_moveis.valor_total) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Valor Médio</small>
+                                            <strong>{{ formatar_moeda(stats.dispositivos_moveis.valor_medio) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Depreciação</small>
+                                            <strong class="text-warning">{{ formatar_moeda(stats.dispositivos_moveis.depreciacao_acumulada) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-box">
+                                            <small class="text-muted d-block">Valor Residual</small>
+                                            <strong class="text-success">{{ formatar_moeda(stats.dispositivos_moveis.valor_residual_total) }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="text-muted mb-3">Status dos Ativos</h6>
+                                <div class="status-bars">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="status-label">Ativos</span>
+                                        <div class="progress flex-grow-1 ms-3">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: {{ (stats.dispositivos_moveis.status.ativos / stats.dispositivos_moveis.total * 100) if stats.dispositivos_moveis.total > 0 else 0 }}%">
+                                                {{ stats.dispositivos_moveis.status.ativos }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="status-label">Manutenção</span>
+                                        <div class="progress flex-grow-1 ms-3">
+                                            <div class="progress-bar bg-warning" 
+                                                 style="width: {{ (stats.dispositivos_moveis.status.manutencao / stats.dispositivos_moveis.total * 100) if stats.dispositivos_moveis.total > 0 else 0 }}%">
+                                                {{ stats.dispositivos_moveis.status.manutencao }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-label">Inativos</span>
+                                        <div class="progress flex-grow-1 ms-3">
+                                            <div class="progress-bar bg-danger" 
+                                                 style="width: {{ (stats.dispositivos_moveis.status.inativos / stats.dispositivos_moveis.total * 100) if stats.dispositivos_moveis.total > 0 else 0 }}%">
+                                                {{ stats.dispositivos_moveis.status.inativos }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if stats.dispositivos_moveis.obsoletos > 0 %}
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>{{ stats.dispositivos_moveis.obsoletos }}</strong> dispositivos obsoletos
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Por Tipo -->
+                <div class="tab-pane fade" id="por-tipo" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <div class="chart-container bg-light rounded-3 p-4">
+                                <h5 class="mb-4">Distribuição de Investimento por Tipo</h5>
+                                <canvas id="chartPorTipo" style="max-height: 400px;"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light rounded-3 p-4 h-100">
+                                <h5 class="mb-4">Detalhamento por Tipo</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless">
+                                        <thead>
+                                            <tr class="text-muted">
+                                                <th>Tipo</th>
+                                                <th class="text-center">Qtd</th>
+                                                <th class="text-end">Valor Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for tipo in stats.por_tipo %}
+                                            <tr>
+                                                <td>
+                                                    <i class="fas fa-{{ 'laptop' if 'note' in tipo.tipo.lower() else 'desktop' if 'desk' in tipo.tipo.lower() else 'mobile-alt' }} me-2 text-muted"></i>
+                                                    {{ tipo.tipo }}
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-secondary">{{ tipo.quantidade }}</span>
+                                                </td>
+                                                <td class="text-end fw-bold">{{ formatar_moeda(tipo.valor_total) }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot class="border-top">
+                                            <tr>
+                                                <th>Total</th>
+                                                <th class="text-center">{{ stats.por_tipo|sum(attribute='quantidade') }}</th>
+                                                <th class="text-end">{{ formatar_moeda(stats.por_tipo|sum(attribute='valor_total')) }}</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Por Departamento -->
+                <div class="tab-pane fade" id="por-departamento" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <div class="chart-container bg-light rounded-3 p-4">
+                                <h5 class="mb-4">Investimento por Departamento</h5>
+                                <canvas id="chartPorDepartamento" style="max-height: 400px;"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="bg-light rounded-3 p-4 h-100">
+                                <h5 class="mb-4">Ranking de Investimentos</h5>
+                                <div class="department-ranking">
+                                    {% for dept in stats.por_departamento|sort(attribute='valor_investido', reverse=True) %}
+                                    {% if loop.index <= 10 %}
+                                    <div class="ranking-item d-flex align-items-center justify-content-between mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <span class="ranking-number me-3">{{ loop.index }}</span>
+                                            <div>
+                                                <strong>{{ dept.departamento }}</strong>
+                                                <small class="text-muted d-block">{{ dept.quantidade }} dispositivos</small>
+                                            </div>
+                                        </div>
+                                        <strong class="text-primary">{{ formatar_moeda(dept.valor_investido) }}</strong>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Substituições -->
+                <div class="tab-pane fade" id="substituicoes" role="tabpanel">
+                    <div class="replacement-section">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">
+                                <i class="fas fa-sync-alt text-warning me-2"></i>
+                                Previsão de Substituições - Próximos 12 meses
+                            </h5>
+                            <div class="badge bg-danger fs-6">
+                                Investimento Necessário: {{ formatar_moeda(valor_substituicao_total) }}
+                            </div>
+                        </div>
+                        
+                        {% if previsoes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Urgência</th>
+                                        <th>Tipo</th>
+                                        <th>Dispositivo</th>
+                                        <th>Departamento</th>
+                                        <th class="text-center">Idade</th>
+                                        <th>Aquisição</th>
+                                        <th>Substituir até</th>
+                                        <th class="text-end">Valor Estimado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prev in previsoes %}
+                                    <tr class="{% if prev.urgencia == 'ALTA' %}table-danger{% else %}table-warning{% endif %}">
+                                        <td>
+                                            <span class="badge {% if prev.urgencia == 'ALTA' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                {{ prev.urgencia }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-{{ 'laptop' if 'note' in prev.tipo.lower() else 'desktop' if 'desk' in prev.tipo.lower() else 'mobile-alt' }} me-2"></i>
+                                            {{ prev.tipo }}
+                                        </td>
+                                        <td class="fw-semibold">{{ prev.dispositivo }}</td>
+                                        <td>{{ prev.departamento if prev.departamento else 'N/A' }}</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">{{ prev.idade_anos }} anos</span>
+                                        </td>
+                                        <td>{{ prev.data_aquisicao.strftime('%d/%m/%Y') }}</td>
+                                        <td>
+                                            <strong>{{ prev.data_substituicao_prevista.strftime('%d/%m/%Y') }}</strong>
+                                        </td>
+                                        <td class="text-end fw-bold">{{ formatar_moeda(prev.valor_estimado) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Nota:</strong> Os valores estimados incluem inflação de 5% ao ano e são baseados nos valores originais de aquisição.
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                            <h5>Nenhuma substituição prevista para os próximos meses</h5>
+                            <p class="text-muted">Todos os dispositivos estão dentro do prazo de vida útil esperado.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 3px solid transparent;
+        background: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #FEA30B;
+        border-bottom-color: #FEA30B;
+        background: none;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: transparent transparent #FEA30B;
+        color: #FEA30B;
+    }
+    
+    .overview-card {
+        border: 1px solid #e9ecef;
+    }
+    
+    .metric-box {
+        padding: 0.5rem;
+        background: white;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .status-label {
+        min-width: 80px;
+        font-size: 0.875rem;
+    }
+    
+    .progress {
+        height: 20px;
+        background-color: #e9ecef;
+    }
+    
+    .progress-bar {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .ranking-number {
+        width: 30px;
+        height: 30px;
+        background: #FEA30B;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.875rem;
+    }
+    
+    .ranking-item {
+        padding: 0.75rem;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .chart-container {
+        position: relative;
+    }
+    
+    @media print {
+        .btn, .nav-tabs {
+            display: none !important;
+        }
+        
+        .card {
+            break-inside: avoid;
+        }
+    }
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuração comum para gráficos
+    Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    
+    // Gráfico por Tipo
+    const ctxTipo = document.getElementById('chartPorTipo');
+    if (ctxTipo) {
+        new Chart(ctxTipo.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ graficos.tipos.labels|tojson }},
+                datasets: [{
+                    data: {{ graficos.tipos.valores|tojson }},
+                    backgroundColor: [
+                        '#FEA30B',
+                        '#FFC107',
+                        '#FF6B6B',
+                        '#4ECDC4',
+                        '#45B7D1',
+                        '#96CEB4'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = 'R$ ' + context.parsed.toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                                const percentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico por Departamento
+    const ctxDept = document.getElementById('chartPorDepartamento');
+    if (ctxDept) {
+        new Chart(ctxDept.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: {{ graficos.departamentos.labels|tojson }},
+                datasets: [{
+                    label: 'Valor Investido',
+                    data: {{ graficos.departamentos.valores|tojson }},
+                    backgroundColor: '#FEA30B',
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                });
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'R$ ' + context.parsed.y.toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Função para exportar relatório
+function exportarRelatorio() {
+    alert('Funcionalidade de exportação será implementada em breve!');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="bg-white p-5 rounded-4 shadow-sm border-top border-5 border-warning">
+                <h1 class="text-center mb-5">{{ titulo }}</h1>
+                <p class="text-center text-muted mb-5">Selecione o tipo de dispositivo que deseja cadastrar:</p>
+
+                <div class="row g-4">
+                    <!-- Desktop -->
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('cadastro_tipo', tipo_dispositivo='desktop') }}" class="device-card text-decoration-none">
+                            <div class="card h-100 text-center device-option">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <i class="fas fa-desktop device-icon mb-3"></i>
+                                    <h5 class="card-title">Desktop</h5>
+                                    <p class="card-text text-muted">Computadores de mesa</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Notebook -->
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('cadastro_tipo', tipo_dispositivo='notebook') }}" class="device-card text-decoration-none">
+                            <div class="card h-100 text-center device-option">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <i class="fas fa-laptop device-icon mb-3"></i>
+                                    <h5 class="card-title">Notebook</h5>
+                                    <p class="card-text text-muted">Laptops e portáteis</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Tablet -->
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('cadastro_tipo', tipo_dispositivo='tablet') }}" class="device-card text-decoration-none">
+                            <div class="card h-100 text-center device-option">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <i class="fas fa-tablet-alt device-icon mb-3"></i>
+                                    <h5 class="card-title">Tablet</h5>
+                                    <p class="card-text text-muted">Tablets e iPads</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Celular -->
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ url_for('cadastro_tipo', tipo_dispositivo='celular') }}" class="device-card text-decoration-none">
+                            <div class="card h-100 text-center device-option">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <i class="fas fa-mobile-alt device-icon mb-3"></i>
+                                    <h5 class="card-title">Celular</h5>
+                                    <p class="card-text text-muted">Smartphones e celulares</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('relatorio') }}" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar ao Relatório
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #FEA30B;
+    --secondary-color: #343a40;
+    --light-bg: #f8f9fa;
+    --hover-color: #FEA30B;
+    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+.device-option {
+    border: 2px solid #e9ecef;
+    transition: var(--transition);
+    cursor: pointer;
+    min-height: 200px;
+}
+
+.device-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow);
+}
+
+.device-card:hover .card-title {
+    color: var(--primary-color) !important;
+}
+
+.device-icon {
+    font-size: 3rem;
+    color: var(--secondary-color);
+    transition: var(--transition);
+}
+
+.device-option:hover .device-icon {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.card-title {
+    color: var(--secondary-color);
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.card-text {
+    font-size: 0.9rem;
+}
+
+.device-card {
+    display: block;
+}
+
+.device-card:hover {
+    text-decoration: none !important;
+}
+
+@media (max-width: 768px) {
+    .device-icon {
+        font-size: 2.5rem;
+    }
+    
+    .device-option {
+        min-height: 160px;
+    }
+}
+</style>
+{% endblock %}

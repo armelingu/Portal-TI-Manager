@@ -1,7 +1,13 @@
 instance/
 __pycache__/
 *.pyc
-.env
+*.env
 *.log
 banco_de_dados.db
 zip
+logs/
+venv/
+__pycache__/
+public/screenshots/
+instance/
+env/

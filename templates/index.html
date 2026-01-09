@@ -6,17 +6,28 @@
         <div class="col-lg-8">
             <div class="bg-white p-5 rounded-4 shadow-sm border-top border-5 border-warning">
                 <h1 class="text-center mb-4">{{ titulo }}</h1>
+                {% if tipo_dispositivo %}
+                <div class="alert alert-info text-center mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Cadastrando dispositivo do tipo: <strong>{{ tipo_dispositivo.title() }}</strong>
+                </div>
+                {% endif %}
 
                 <form method="POST" class="row g-3 needs-validation" novalidate>
                     {{ form.csrf_token }} <!-- ultima alteração aqui-->
+                    <input type="hidden" name="tipo_dispositivo" value="{{ tipo_dispositivo }}">
 
                     <div class="col-md-6"> <!-- COMEÇO: campo base -->
                         <div class="form-group">
                             {{ form.base.label(class="form-label fw-bold") }}
-                            {{ form.base(class="form-control" + (" is-invalid" if form.base.errors else "")) }}
+                            <div class="input-group">
+                                <input type="text" id="baseDisplay" class="form-control" placeholder="Clique para selecionar uma base..." readonly 
+                                       style="cursor: pointer; background-color: white;" data-bs-toggle="modal" data-bs-target="#modalSelecionarBase">
+                                {{ form.base(style="display: none;") }}
+                            </div>
                             {% if form.base.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.endereco_ip.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.base.errors %}
                                         {{ error }}
                                     {% endfor %}
                                 </div>
@@ -51,6 +62,34 @@
                             {% endif %}
                         </div>
                     </div> <!-- TÉRMINO: campo departamento -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo organização -->
+                        <div class="form-group">
+                            {{ form.organizacao.label(class="form-label fw-bold") }}
+                            {{ form.organizacao(class="form-control" + (" is-invalid" if form.organizacao.errors else "")) }}
+                            {% if form.organizacao.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.organizacao.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo organização -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo onedrive pessoal -->
+                        <div class="form-group">
+                            {{ form.onedrive_pessoal.label(class="form-label fw-bold") }}
+                            {{ form.onedrive_pessoal(class="form-select" + (" is-invalid" if form.onedrive_pessoal.errors else "")) }}
+                            {% if form.onedrive_pessoal.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.onedrive_pessoal.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo onedrive pessoal -->
             
                     <div class="col-md-6"> <!-- COMEÇO: campo endereço IP -->
                         <div class="form-group">
@@ -93,6 +132,20 @@
                             {% endif %}
                         </div>
                     </div> <!-- TÉRMINO: campo hostname -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo serial number -->
+                        <div class="form-group">
+                            {{ form.serial_number.label(class="form-label fw-bold") }}
+                            {{ form.serial_number(class="form-control" + (" is-invalid" if form.serial_number.errors else ""), placeholder="Ex.: ABC123DEF456") }}
+                            {% if form.serial_number.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.serial_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo serial number -->
             
                     <div class="col-md-6"> <!-- COMEÇO: campo memoria_ram -->
                         <div class="form-group">
@@ -150,6 +203,21 @@
                         </div>
                     </div> <!-- TÉRMINO: campo anydesk -->
 
+            <!-- Botão para abrir modal financeiro -->
+            <div class="col-12 mt-4">
+                <hr>
+                <div class="text-center">
+                    <button type="button" class="btn btn-outline-warning btn-lg" data-bs-toggle="modal" data-bs-target="#modalFinanceiro">
+                        <i class="fas fa-coins me-2"></i> Adicionar Informações Financeiras
+                        <i class="fas fa-chevron-down ms-2"></i>
+                    </button>
+                    <p class="text-muted mt-2">
+                        <small><i class="fas fa-info-circle"></i> Opcional - Clique para adicionar dados patrimoniais e de depreciação</small>
+                    </p>
+                </div>
+            </div>
+
+
             <div class="col-12 text-center mt-4">
                 <button type="submit" class="btn btn-warning px-4 py-2 me-2" id="btnCadastrar">
                     <i class="fas fa-save me-2"></i> Cadastrar
@@ -158,6 +226,151 @@
                     <i class="fas fa-times me-2"></i> Cancelar
                 </a>
             </div>
+            
+            <!-- Modal de Informações Financeiras -->
+            <div class="modal fade" id="modalFinanceiro" tabindex="-1" aria-labelledby="modalFinanceiroLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalFinanceiroLabel">
+                                <i class="fas fa-coins me-2"></i> Informações Financeiras e Patrimoniais
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <!-- Seção de Aquisição -->
+                                <div class="financial-section">
+                                    <div class="text-center financial-icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <h6 class="text-center mb-3">Dados de Aquisição</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.valor_aquisicao.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white">R$</span>
+                                                    {{ form.valor_aquisicao(class="form-control", placeholder="0,00") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.data_aquisicao.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-calendar"></i></span>
+                                                    {{ form.data_aquisicao(class="form-control", type="date") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.fornecedor.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-store"></i></span>
+                                                    {{ form.fornecedor(class="form-control", placeholder="Ex.: Dell, Lenovo, HP") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Seção de Depreciação -->
+                                <div class="financial-section">
+                                    <div class="text-center financial-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h6 class="text-center mb-3">Configurações de Depreciação</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.vida_util_anos.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-clock"></i></span>
+                                                    {{ form.vida_util_anos(class="form-control") }}
+                                                    <span class="input-group-text">anos</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.taxa_depreciacao.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-percentage"></i></span>
+                                                    {{ form.taxa_depreciacao(class="form-control") }}
+                                                    <span class="input-group-text">% ao ano</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.status_ativo.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-info-circle"></i></span>
+                                                    {{ form.status_ativo(class="form-control") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Seção de Controle -->
+                                <div class="financial-section">
+                                    <div class="text-center financial-icon">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <h6 class="text-center mb-3">Controle Administrativo</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.numero_nota_fiscal.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-file-invoice"></i></span>
+                                                    {{ form.numero_nota_fiscal(class="form-control", placeholder="Ex.: 123456") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.categoria_financeira.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-tag"></i></span>
+                                                    {{ form.categoria_financeira(class="form-control") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.centro_custo.label(class="form-label") }}
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-warning text-white"><i class="fas fa-sitemap"></i></span>
+                                                    {{ form.centro_custo(class="form-control") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <strong>Dica:</strong> Preencher essas informações permite acompanhar a depreciação, 
+                                    planejar substituições e gerar relatórios financeiros detalhados.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i> Fechar
+                            </button>
+                            <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                                <i class="fas fa-check me-2"></i> Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </form>
     </div>
 </div>
@@ -211,6 +424,107 @@
     background-color: var(--hover-color);
     border-color: var(--hover-color);
     transform: translateY(-2px);
-}
+    }
+    
+    /* Estilos para o modal financeiro */
+    .modal-header {
+        background: linear-gradient(135deg, #FEA30B 0%, #ff8c00 100%);
+        color: white;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+    }
+    
+    .financial-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .financial-icon {
+        font-size: 24px;
+        color: #FEA30B;
+        margin-bottom: 10px;
+    }
+    
+    .btn-outline-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(254, 163, 11, 0.3);
+    }
 </style>
+
+<!-- Modal de Seleção de Base -->
+<div class="modal fade" id="modalSelecionarBase" tabindex="-1" aria-labelledby="modalSelecionarBaseLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalSelecionarBaseLabel">
+                    <i class="fas fa-building me-2"></i> Selecionar Base
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    {% for choice in form.base.choices %}
+                        {% if choice[0] %}
+                            <a href="#" class="list-group-item list-group-item-action base-option" 
+                               data-base-id="{{ choice[0] }}" data-base-nome="{{ choice[1] }}">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <h6 class="mb-1">{{ choice[1] }}</h6>
+                                    <i class="fas fa-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script para gerenciar a seleção de base
+document.addEventListener('DOMContentLoaded', function() {
+    const baseOptions = document.querySelectorAll('.base-option');
+    const baseDisplay = document.getElementById('baseDisplay');
+    const baseSelect = document.getElementById('base');
+    const modalElement = document.getElementById('modalSelecionarBase');
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // Verificar se já há uma base selecionada
+    if (baseSelect && baseSelect.value) {
+        const selectedOption = baseSelect.options[baseSelect.selectedIndex];
+        if (selectedOption && selectedOption.text) {
+            baseDisplay.value = selectedOption.text;
+        }
+    }
+    
+    baseOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const baseId = this.getAttribute('data-base-id');
+            const baseNome = this.getAttribute('data-base-nome');
+            
+            // Atualizar o campo display
+            baseDisplay.value = baseNome;
+            
+            // Atualizar o select oculto
+            baseSelect.value = baseId;
+            
+            // Remover classe active de todas as opções
+            baseOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Adicionar classe active na opção selecionada
+            this.classList.add('active');
+            
+            // Fechar o modal
+            modal.hide();
+        });
+    });
+});
+</script>
+
 {% endblock %}

@@ -2,40 +2,55 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Auditoria do Sistema</h2>
+    <h2 class="text-center mb-4">
+        <i class="fas fa-clipboard-list me-2"></i>Auditoria do Sistema
+    </h2>
 
     <div class="card shadow p-4">
-        <input type="text" id="campoBuscaLogs" class="form-control mb-3" placeholder="Buscar por usuário, ação ou IP...">
-
+        <!-- Formulário de Filtros -->
         <div class="card p-4 shadow mb-4">
+            <h6 class="card-title">
+                <i class="fas fa-filter me-2"></i>Filtros de Busca
+            </h6>
             <form method="GET" action="{{ url_for('logs_auditoria') }}" class="row g-3">
                 <div class="col-md-3">
+                    <label class="form-label small">Usuário:</label>
                     <input type="text" name="usuario" class="form-control" placeholder="Buscar por usuário..." value="{{ request.args.get('usuario', '') }}">
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label small">Ação:</label>
                     <input type="text" name="acao" class="form-control" placeholder="Buscar por ação..." value="{{ request.args.get('acao', '') }}">
                 </div>
                 <div class="col-md-2">
-                    <input type="date" name="data_inicio" class="form-control" placeholder="Data Início" value="{{ request.args.get('data_inicio', '') }}">
+                    <label class="form-label small">Data Início:</label>
+                    <input type="date" name="data_inicio" class="form-control" value="{{ request.args.get('data_inicio', '') }}">
                 </div>
                 <div class="col-md-2">
-                    <input type="date" name="data_fim" class="form-control" placeholder="Data Fim" value="{{ request.args.get('data_fim', '') }}">
+                    <label class="form-label small">Data Fim:</label>
+                    <input type="date" name="data_fim" class="form-control" value="{{ request.args.get('data_fim', '') }}">
                 </div>
-                <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-primary">Buscar</button>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i>Buscar
+                    </button>
+                    <a href="{{ url_for('logs_auditoria') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>Limpar
+                    </a>
                 </div>
             </form>
-        </div>    
+        </div>
         
+        <!-- Botão de Exportar -->
         <div class="d-flex justify-content-end mb-3">
             <a href="{{ url_for('exportar_logs', **request.args.to_dict()) }}" class="btn btn-success">
-                <i class="fas fa-file-csv"></i> Exportar Logs para CSV
+                <i class="fas fa-file-csv me-2"></i>Exportar Logs para CSV
             </a>
         </div>
         
-
+        <!-- Tabela de Logs -->
+        {% if logs %}
         <div class="table-responsive">
-            <table id="tabelaLogs" class="table table-striped table-hover shadow">
+            <table id="tabelaAuditoria" class="table table-striped table-hover shadow">
                 <thead class="table-dark">
                     <tr>
                         <th>Data/Hora</th>
@@ -45,47 +60,134 @@
                         <th>Detalhes</th>
                     </tr>
                 </thead>
-                <tbody id="tabelaLogs">
+                <tbody>
                     {% for log in logs %}
                     <tr>
-                        <td>{{ log.data_hora.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                        <td data-sort="{{ to_local_time(log.data_hora).strftime('%Y-%m-%d %H:%M:%S') }}">
+                            {{ to_local_time(log.data_hora).strftime('%d/%m/%Y %H:%M:%S') }}
+                        </td>
                         <td>{{ log.usuario.username if log.usuario else 'Desconhecido' }}</td>
-                        <td>{{ log.acao }}</td>
+                        <td>
+                            {% if log.acao == 'Login no sistema' %}
+                                <span class="badge bg-success">{{ log.acao }}</span>
+                            {% elif log.acao == 'Logout do sistema' %}
+                                <span class="badge bg-warning">{{ log.acao }}</span>
+                            {% elif 'Exclusão' in log.acao %}
+                                <span class="badge bg-danger">{{ log.acao }}</span>
+                            {% elif 'Cadastro' in log.acao %}
+                                <span class="badge bg-primary">{{ log.acao }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ log.acao }}</span>
+                            {% endif %}
+                        </td>
                         <td>{{ log.ip_origem or 'N/D' }}</td>
                         <td>{{ log.detalhes or 'Sem detalhes' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    let tabelaLogs = new DataTable('#tabelaLogs', {
-                        language: {
-                            url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/pt-BR.json'
-                        },
-                        order: [[0, 'desc']]
-                    });
-                });
-                </script>
         </div>
+        {% else %}
+        <div class="text-center my-5">
+            <i class="fas fa-clipboard-list fa-3x mb-3 text-secondary"></i>
+            <h4 class="mb-3">Nenhum log encontrado</h4>
+            <p class="text-muted">Não há logs de auditoria com os critérios especificados.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+<!-- CSS Personalizado -->
+<style>
+.badge {
+    font-size: 0.85rem;
+}
+
+.table thead th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+}
+
+.shadow {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table-responsive {
+    border-radius: 8px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.page-link {
+    color: #0d6efd;
+}
+
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
+
+<!-- JavaScript usando bibliotecas já carregadas pelo base.html -->
 <script>
-// Busca fluída na tabela de logs
-document.addEventListener('DOMContentLoaded', function () {
-    const inputBusca = document.getElementById('campoBuscaLogs');
-    const linhasTabela = document.querySelectorAll('#tabelaLogs tr');
-
-    inputBusca.addEventListener('input', function () {
-        const termo = inputBusca.value.toLowerCase();
-
-        linhasTabela.forEach(linha => {
-            const textoLinha = linha.innerText.toLowerCase();
-            linha.style.display = textoLinha.includes(termo) ? '' : 'none';
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    {% if logs %}
+    // Destruir qualquer instância existente do DataTables
+    if ($.fn.DataTable.isDataTable('#tabelaAuditoria')) {
+        $('#tabelaAuditoria').DataTable().destroy();
+    }
+    
+    // Inicializar DataTables apenas se houver logs
+    $('#tabelaAuditoria').DataTable({
+        responsive: true,
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+        },
+        order: [[0, 'desc']], // Ordenar por data decrescente
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+        columnDefs: [
+            { targets: 0, type: 'date' }, // Coluna Data/Hora
+            { targets: 4, searchable: true, orderable: false } // Coluna Detalhes
+        ],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros por página",
+            info: "Mostrando _START_ até _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 até 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totais)",
+            paginate: {
+                first: "Primeiro",
+                last: "Último", 
+                next: "Próximo",
+                previous: "Anterior"
+            },
+            emptyTable: "Nenhum dado disponível na tabela",
+            zeroRecords: "Nenhum registro encontrado"
+        }
     });
+    {% endif %}
 });
 </script>
+
 {% endblock %}

@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bg-white p-5 rounded-4 shadow-sm border-top border-5 border-warning">
+                <h1 class="text-center mb-4">{{ titulo }}</h1>
+                {% if tipo_dispositivo %}
+                <div class="alert alert-info text-center mb-4">
+                    <i class="fas fa-mobile-alt me-2"></i>
+                    Cadastrando dispositivo móvel: <strong>{{ tipo_dispositivo.title() }}</strong>
+                </div>
+                {% endif %}
+
+                <form method="POST" class="row g-3 needs-validation" novalidate>
+                    {{ form.csrf_token }}
+                    <input type="hidden" name="tipo_dispositivo" value="{{ tipo_dispositivo }}">
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo base -->
+                        <div class="form-group">
+                            {{ form.base.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <input type="text" id="baseDisplay" class="form-control" placeholder="Clique para selecionar uma base..." readonly 
+                                       style="cursor: pointer; background-color: white;" data-bs-toggle="modal" data-bs-target="#modalSelecionarBase">
+                                {{ form.base(style="display: none;") }}
+                            </div>
+                            {% if form.base.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.base.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo base -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo nome responsável -->
+                        <div class="form-group">
+                            {{ form.nome.label(class="form-label fw-bold") }}
+                            {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else ""), placeholder="Nome do responsável pelo dispositivo") }}
+                            {% if form.nome.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.nome.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo nome responsável -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo departamento -->
+                        <div class="form-group">
+                            {{ form.departamento.label(class="form-label fw-bold") }}
+                            {{ form.departamento(class="form-control" + (" is-invalid" if form.departamento.errors else "")) }}
+                            {% if form.departamento.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.departamento.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo departamento -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo organização -->
+                        <div class="form-group">
+                            {{ form.organizacao.label(class="form-label fw-bold") }}
+                            {{ form.organizacao(class="form-control" + (" is-invalid" if form.organizacao.errors else "")) }}
+                            {% if form.organizacao.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.organizacao.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo organização -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo onedrive pessoal -->
+                        <div class="form-group">
+                            {{ form.onedrive_pessoal.label(class="form-label fw-bold") }}
+                            {{ form.onedrive_pessoal(class="form-select" + (" is-invalid" if form.onedrive_pessoal.errors else "")) }}
+                            {% if form.onedrive_pessoal.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.onedrive_pessoal.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo onedrive pessoal -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo número telefone -->
+                        <div class="form-group">
+                            {{ form.numero_telefone.label(class="form-label fw-bold") }}
+                            {{ form.numero_telefone(class="form-control" + (" is-invalid" if form.numero_telefone.errors else ""), placeholder="(11) 99999-9999") }}
+                            {% if form.numero_telefone.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numero_telefone.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo número telefone -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo IMEI -->
+                        <div class="form-group">
+                            {{ form.imei.label(class="form-label fw-bold") }}
+                            {{ form.imei(class="form-control" + (" is-invalid" if form.imei.errors else ""), placeholder="15 dígitos do IMEI") }}
+                            {% if form.imei.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.imei.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo IMEI -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo modelo -->
+                        <div class="form-group">
+                            {{ form.modelo_dispositivo.label(class="form-label fw-bold") }}
+                            {{ form.modelo_dispositivo(class="form-control" + (" is-invalid" if form.modelo_dispositivo.errors else ""), placeholder="Ex.: iPhone 13, Galaxy Tab S7") }}
+                            {% if form.modelo_dispositivo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.modelo_dispositivo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo modelo -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo sistema operacional -->
+                        <div class="form-group">
+                            {{ form.sistema_operacional.label(class="form-label fw-bold") }}
+                            {{ form.sistema_operacional(class="form-control" + (" is-invalid" if form.sistema_operacional.errors else "")) }}
+                            {% if form.sistema_operacional.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.sistema_operacional.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo sistema operacional -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo versão SO -->
+                        <div class="form-group">
+                            {{ form.versao_so.label(class="form-label fw-bold") }}
+                            {{ form.versao_so(class="form-control" + (" is-invalid" if form.versao_so.errors else ""), placeholder="Ex.: 17.1, 13.0") }}
+                            {% if form.versao_so.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.versao_so.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo versão SO -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo número chip -->
+                        <div class="form-group">
+                            {{ form.numero_chip.label(class="form-label fw-bold") }}
+                            {{ form.numero_chip(class="form-control" + (" is-invalid" if form.numero_chip.errors else ""), placeholder="Número da linha/chip (opcional)") }}
+                            {% if form.numero_chip.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numero_chip.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo número chip -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo plano dados -->
+                        <div class="form-group">
+                            {{ form.plano_dados.label(class="form-label fw-bold") }}
+                            {{ form.plano_dados(class="form-control" + (" is-invalid" if form.plano_dados.errors else ""), placeholder="Ex.: 10GB, Ilimitado (opcional)") }}
+                            {% if form.plano_dados.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.plano_dados.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo plano dados -->
+
+                    <div class="col-md-6"> <!-- COMEÇO: campo operadora -->
+                        <div class="form-group">
+                            {{ form.operadora.label(class="form-label fw-bold") }}
+                            {{ form.operadora(class="form-control" + (" is-invalid" if form.operadora.errors else "")) }}
+                            {% if form.operadora.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.operadora.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> <!-- TÉRMINO: campo operadora -->
+
+                    <!-- Botão para abrir modal financeiro -->
+                    <div class="col-12 mt-4">
+                        <hr>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-outline-warning btn-lg" data-bs-toggle="modal" data-bs-target="#modalFinanceiroMovel">
+                                <i class="fas fa-coins me-2"></i> Adicionar Informações Financeiras
+                                <i class="fas fa-chevron-down ms-2"></i>
+                            </button>
+                            <p class="text-muted mt-2">
+                                <small><i class="fas fa-info-circle"></i> Opcional - Clique para adicionar dados patrimoniais e de depreciação</small>
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div class="col-12 text-center mt-4">
+                        <button type="submit" class="btn btn-warning px-4 py-2 me-2" id="btnCadastrar">
+                            <i class="fas fa-save me-2"></i> Cadastrar Dispositivo
+                        </button>                
+                        <a href="{{ url_for('relatorio') }}" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="fas fa-times me-2"></i> Cancelar
+                        </a>
+                    </div>
+                    
+                    <!-- Modal de Informações Financeiras para Dispositivos Móveis -->
+                    <div class="modal fade" id="modalFinanceiroMovel" tabindex="-1" aria-labelledby="modalFinanceiroMovelLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalFinanceiroMovelLabel">
+                                        <i class="fas fa-coins me-2"></i> Informações Financeiras - Dispositivos Móveis
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container-fluid">
+                                        <!-- Aviso sobre depreciação acelerada -->
+                                        <div class="alert alert-warning mb-4">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>Atenção:</strong> Dispositivos móveis possuem depreciação acelerada (33.33% ao ano) e vida útil menor (3 anos).
+                                        </div>
+                                        
+                                        <!-- Seção de Aquisição -->
+                                        <div class="financial-section">
+                                            <div class="text-center financial-icon">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </div>
+                                            <h6 class="text-center mb-3">Dados de Aquisição</h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.valor_aquisicao.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white">R$</span>
+                                                            {{ form.valor_aquisicao(class="form-control", placeholder="0,00") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.data_aquisicao.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-calendar"></i></span>
+                                                            {{ form.data_aquisicao(class="form-control", type="date") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.fornecedor.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-store"></i></span>
+                                                            {{ form.fornecedor(class="form-control", placeholder="Ex.: Apple, Samsung, Xiaomi") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Seção de Depreciação -->
+                                        <div class="financial-section">
+                                            <div class="text-center financial-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <h6 class="text-center mb-3">Configurações de Depreciação</h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.vida_util_anos.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-clock"></i></span>
+                                                            {{ form.vida_util_anos(class="form-control") }}
+                                                            <span class="input-group-text">anos</span>
+                                                        </div>
+                                                        <small class="text-muted">Padrão: 3 anos para móveis</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.taxa_depreciacao.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-percentage"></i></span>
+                                                            {{ form.taxa_depreciacao(class="form-control") }}
+                                                            <span class="input-group-text">% ao ano</span>
+                                                        </div>
+                                                        <small class="text-muted">Padrão: 33.33% para móveis</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.status_ativo.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-info-circle"></i></span>
+                                                            {{ form.status_ativo(class="form-control") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Seção de Controle -->
+                                        <div class="financial-section">
+                                            <div class="text-center financial-icon">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                            <h6 class="text-center mb-3">Controle Administrativo</h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.numero_nota_fiscal.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-file-invoice"></i></span>
+                                                            {{ form.numero_nota_fiscal(class="form-control", placeholder="Ex.: 123456") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.categoria_financeira.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-tag"></i></span>
+                                                            {{ form.categoria_financeira(class="form-control") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        {{ form.centro_custo.label(class="form-label") }}
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-warning text-white"><i class="fas fa-sitemap"></i></span>
+                                                            {{ form.centro_custo(class="form-control") }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-info mt-3">
+                                            <i class="fas fa-lightbulb me-2"></i>
+                                            <strong>Dica:</strong> Dispositivos móveis depreciam mais rapidamente. 
+                                            Considere planejar substituições a cada 2-3 anos para manter a produtividade.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="fas fa-times me-2"></i> Fechar
+                                    </button>
+                                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                                        <i class="fas fa-check me-2"></i> Confirmar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #FEA30B;
+    --secondary-color: #343a40;
+    --light-bg: #f8f9fa;
+    --hover-color: #FEA30B;
+    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+.form-container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    box-shadow: var(--box-shadow);
+    border-top: 5px solid var(--primary-color);
+}
+
+.form-title {
+    color: var(--secondary-color);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.form-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 4px;
+    width: 60px;
+    background-color: var(--primary-color);
+}
+
+.btn-warning {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-warning:hover {
+    background-color: var(--hover-color);
+    border-color: var(--hover-color);
+    transform: translateY(-2px);
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+}
+
+/* Estilos para o modal financeiro */
+.modal-header {
+    background: linear-gradient(135deg, #FEA30B 0%, #ff8c00 100%);
+    color: white;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.financial-section {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.financial-icon {
+    font-size: 24px;
+    color: #FEA30B;
+    margin-bottom: 10px;
+}
+
+.btn-outline-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(254, 163, 11, 0.3);
+}
+</style>
+
+<!-- Modal de Seleção de Base -->
+<div class="modal fade" id="modalSelecionarBase" tabindex="-1" aria-labelledby="modalSelecionarBaseLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalSelecionarBaseLabel">
+                    <i class="fas fa-building me-2"></i> Selecionar Base
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    {% for choice in form.base.choices %}
+                        {% if choice[0] %}
+                            <a href="#" class="list-group-item list-group-item-action base-option" 
+                               data-base-id="{{ choice[0] }}" data-base-nome="{{ choice[1] }}">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <h6 class="mb-1">{{ choice[1] }}</h6>
+                                    <i class="fas fa-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script para gerenciar a seleção de base
+document.addEventListener('DOMContentLoaded', function() {
+    const baseOptions = document.querySelectorAll('.base-option');
+    const baseDisplay = document.getElementById('baseDisplay');
+    const baseSelect = document.getElementById('base');
+    const modalElement = document.getElementById('modalSelecionarBase');
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // Verificar se já há uma base selecionada
+    if (baseSelect && baseSelect.value) {
+        const selectedOption = baseSelect.options[baseSelect.selectedIndex];
+        if (selectedOption && selectedOption.text) {
+            baseDisplay.value = selectedOption.text;
+        }
+    }
+    
+    baseOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const baseId = this.getAttribute('data-base-id');
+            const baseNome = this.getAttribute('data-base-nome');
+            
+            // Atualizar o campo display
+            baseDisplay.value = baseNome;
+            
+            // Atualizar o select oculto
+            baseSelect.value = baseId;
+            
+            // Remover classe active de todas as opções
+            baseOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Adicionar classe active na opção selecionada
+            this.classList.add('active');
+            
+            // Fechar o modal
+            modal.hide();
+        });
+    });
+});
+</script>
+
+{% endblock %}

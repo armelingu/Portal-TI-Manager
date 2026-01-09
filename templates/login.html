@@ -1,40 +1,289 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h3 class="text-center mb-4">Login</h3>
-
-                    <!-- {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %} -->
-
-                    <form method="POST" action="{{ url_for('login') }}">
-                        {{ form.hidden_tag() }}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Portal TI Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .login-left {
+            background: linear-gradient(135deg, #FEA30B 0%, #FF8C00 100%);
+            color: white;
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .login-right {
+            padding: 60px 50px;
+            background: white;
+        }
+        
+        .logo-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .login-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+        
+        .login-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        
+        .feature-list {
+            text-align: left;
+            margin-top: 40px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-item i {
+            font-size: 24px;
+            margin-right: 15px;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .feature-item span {
+            font-size: 16px;
+        }
+        
+        .form-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .form-subtitle {
+            color: #6c757d;
+            margin-bottom: 40px;
+        }
+        
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px 15px 50px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            border-color: #FEA30B;
+            box-shadow: 0 0 0 0.2rem rgba(254, 163, 11, 0.15);
+            background-color: white;
+        }
+        
+        .form-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 18px;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #FEA30B 0%, #FF8C00 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 15px;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(254, 163, 11, 0.3);
+            background: linear-gradient(135deg, #FF8C00 0%, #FEA30B 100%);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+        
+        .alert-danger {
+            background-color: #fee;
+            color: #dc3545;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .security-info {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .security-info i {
+            color: #28a745;
+            margin-right: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .login-left, .login-right {
+                padding: 40px 30px;
+            }
+            
+            .login-title {
+                font-size: 2rem;
+            }
+            
+            .feature-list {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="row g-0">
+                <!-- Left Side - Branding -->
+                <div class="col-lg-5">
+                    <div class="login-left h-100">
+                        <i class="fas fa-desktop logo-icon"></i>
+                        <h1 class="login-title">Portal TI Manager</h1>
+                        <p class="login-subtitle">Sistema de Gestão de Ativos de TI</p>
                         
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Usuário</label>
-                            {{ form.username(class="form-control", id="username", required=True, autofocus=True) }}
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Acesso Seguro e Protegido</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Dashboard Completo</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-cogs"></i>
+                                <span>Gestão Inteligente</span>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Senha</label>
-                            {{ form.password(class="form-control", id="password", required=True) }}
+                    </div>
+                </div>
+                
+                <!-- Right Side - Login Form -->
+                <div class="col-lg-7">
+                    <div class="login-right">
+                        <h2 class="form-title">Bem-vindo de volta!</h2>
+                        <p class="form-subtitle">Entre com suas credenciais para acessar o sistema</p>
+                        
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <form method="POST" action="{{ url_for('login') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="form-group">
+                                <i class="fas fa-user form-icon"></i>
+                                {{ form.username(class="form-control", placeholder="Digite seu usuário", required=True, autofocus=True) }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <i class="fas fa-lock form-icon"></i>
+                                {{ form.password(class="form-control", placeholder="Digite sua senha", required=True) }}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-login">
+                                <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                            </button>
+                        </form>
+                        
+                        <div class="security-info">
+                            <i class="fas fa-lock"></i>
+                            Conexão segura e criptografada
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Entrar</button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

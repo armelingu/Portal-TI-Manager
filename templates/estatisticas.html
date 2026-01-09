@@ -1,163 +1,626 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="text-center mb-5">{{ titulo }}</h1>
-
-    <!-- Cards principais -->
-    <div class="row g-4">
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-center shadow-sm border-0 h-100">
-                <div class="card-body py-4">
-                    <i class="fas fa-desktop fa-3x mb-3 text-primary"></i>
-                    <h6 class="text-uppercase text-muted mb-2">Total de Máquinas</h6>
-                    <h2 class="mb-0">{{ total_maquinas }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-center shadow-sm border-0 h-100">
-                <div class="card-body py-4">
-                    <i class="fas fa-building fa-3x mb-3 text-success"></i>
-                    <h6 class="text-uppercase text-muted mb-2">Departamentos</h6>
-                    <h2 class="mb-0">{{ total_departamentos }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-center shadow-sm border-0 h-100">
-                <div class="card-body py-4">
-                    <i class="fas fa-memory fa-3x mb-3 text-warning"></i>
-                    <h6 class="text-uppercase text-muted mb-2">Média de RAM</h6>
-                    <h2 class="mb-0">{{ media_ram }} GB</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-center shadow-sm border-0 h-100">
-                <div class="card-body py-4">
-                    <i class="fas fa-hdd fa-3x mb-3 text-danger"></i>
-                    <h6 class="text-uppercase text-muted mb-2">Média de SSD</h6>
-                    <h2 class="mb-0">{{ media_ssd }} GB</h2>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-white rounded-4 shadow-sm p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 mb-0">
+                            <i class="fas fa-chart-line text-warning"></i> {{ titulo }}
+                        </h1>
+                        <p class="text-muted mb-0 mt-2">
+                            Visão geral dos dispositivos e recursos do sistema
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-2"></i>Exportar Dados
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="exportarPDF()">
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('exportar_csv') }}">
+                                    <i class="fas fa-file-excel text-success me-2"></i>Excel
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabelas de distribuição -->
-    <div class="row mt-5 g-4">
-        <!-- Departamentos -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie me-2"></i> Distribuição por Departamento
-                    </h5>
-                </div>
+    <!-- Cards principais com novo design -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Departamento</th>
-                                    <th>Quantidade</th>
-                                    <th>Porcentagem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for dept in departamentos %}
-                                <tr>
-                                    <td>{{ dept.nome }}</td>
-                                    <td>{{ dept.quantidade }}</td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ dept.porcentagem }}%;" aria-valuenow="{{ dept.porcentagem }}" aria-valuemin="0" aria-valuemax="100">
-                                                {{ "%.1f"|format(dept.porcentagem) }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Total de Máquinas
+                            </h6>
+                            <h2 class="mb-0 fw-bold">{{ total_maquinas }}</h2>
+                            <p class="text-success mb-0 small">
+                                <i class="fas fa-arrow-up me-1"></i>
+                                Ativos no sistema
+                            </p>
+                        </div>
+                        <div class="icon-box bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-desktop fa-2x text-primary"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Recursos (RAM e SSD) -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Departamentos
+                            </h6>
+                            <h2 class="mb-0 fw-bold">{{ total_departamentos }}</h2>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-building me-1"></i>
+                                Setores atendidos
+                            </p>
+                        </div>
+                        <div class="icon-box bg-success bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-building fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Média de RAM
+                            </h6>
+                            <h2 class="mb-0 fw-bold">{{ media_ram }} GB</h2>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-memory me-1"></i>
+                                Por dispositivo
+                            </p>
+                        </div>
+                        <div class="icon-box bg-warning bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-memory fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1" style="font-size: 0.75rem;">
+                                Média de SSD
+                            </h6>
+                            <h2 class="mb-0 fw-bold">{{ media_ssd }} GB</h2>
+                            <p class="text-muted mb-0 small">
+                                <i class="fas fa-hdd me-1"></i>
+                                Por dispositivo
+                            </p>
+                        </div>
+                        <div class="icon-box bg-danger bg-opacity-10 rounded-3 p-3">
+                            <i class="fas fa-hdd fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos e Tabelas -->
+    <div class="row g-3">
+        <!-- Distribuição por Departamento -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie text-warning me-2"></i>
+                            Distribuição por Departamento
+                        </h5>
+                        <small class="text-muted">{{ total_maquinas }} dispositivos</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Gráfico de Pizza -->
+                    <div class="chart-container mb-4" style="position: relative; height: 250px;">
+                        <canvas id="departamentoChart"></canvas>
+                    </div>
+                    
+                    <!-- Lista detalhada -->
+                    <div class="department-list">
+                        {% for dept in departamentos %}
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="color-indicator rounded-circle me-2" 
+                                     style="width: 12px; height: 12px; background-color: {{ loop.cycle('#FEA30B', '#FFC107', '#FF9800', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#DDA0DD') }}">
+                                </div>
+                                <span class="fw-semibold">{{ dept.nome }}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-light text-dark">{{ dept.quantidade }}</span>
+                                <small class="text-muted ms-2">{{ "%.1f"|format(dept.porcentagem) }}%</small>
+                            </div>
+                        </div>
+                        <div class="progress mb-3" style="height: 6px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {{ dept.porcentagem }}%;" 
+                                 aria-valuenow="{{ dept.porcentagem }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribuição de Recursos -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0">
                     <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i> Distribuição de Recursos
+                        <i class="fas fa-chart-bar text-warning me-2"></i>
+                        Distribuição de Recursos
                     </h5>
                 </div>
                 <div class="card-body">
-                    <!-- RAM -->
-                    <h6 class="text-muted mb-2">Distribuição de RAM</h6>
-                    <div class="table-responsive mb-4">
-                        <table class="table align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>RAM (GB)</th>
-                                    <th>Quantidade</th>
-                                    <th>Porcentagem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ram in distribuicao_ram %}
-                                <tr>
-                                    <td>{{ ram.tamanho }} GB</td>
-                                    <td>{{ ram.quantidade }}</td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ ram.porcentagem }}%;" aria-valuenow="{{ ram.porcentagem }}" aria-valuemin="0" aria-valuemax="100">
-                                                {{ "%.1f"|format(ram.porcentagem) }}%
+                    <!-- Tabs para RAM e SSD -->
+                    <ul class="nav nav-tabs border-0 mb-4" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ramTab" type="button">
+                                <i class="fas fa-memory me-2"></i>RAM
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ssdTab" type="button">
+                                <i class="fas fa-hdd me-2"></i>SSD
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Tab RAM -->
+                        <div class="tab-pane fade show active" id="ramTab">
+                            <div class="chart-container mb-4" style="position: relative; height: 250px;">
+                                <canvas id="ramChart"></canvas>
+                            </div>
+                            
+                            {% for ram in distribuicao_ram %}
+                            <div class="resource-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold">{{ ram.tamanho }} GB</span>
+                                    <div>
+                                        <span class="badge bg-warning bg-opacity-10 text-dark">
+                                            {{ ram.quantidade }} dispositivos
+                                        </span>
+                                        <small class="text-muted ms-2">{{ "%.1f"|format(ram.porcentagem) }}%</small>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         style="width: {{ ram.porcentagem }}%;">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Tab SSD -->
+                        <div class="tab-pane fade" id="ssdTab">
+                            <div class="chart-container mb-4" style="position: relative; height: 250px;">
+                                <canvas id="ssdChart"></canvas>
+                            </div>
+                            
+                            {% for ssd in distribuicao_ssd %}
+                            <div class="resource-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold">{{ ssd.tamanho }} GB</span>
+                                    <div>
+                                        <span class="badge bg-danger bg-opacity-10 text-dark">
+                                            {{ ssd.quantidade }} dispositivos
+                                        </span>
+                                        <small class="text-muted ms-2">{{ "%.1f"|format(ssd.porcentagem) }}%</small>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" 
+                                         style="width: {{ ssd.porcentagem }}%;">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Inteligentes -->
+    <div class="row g-3 mt-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Insights e Recomendações Inteligentes
+                        </h5>
+                        <small class="text-muted">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            Atualizado automaticamente ao modificar dados
+                        </small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if insights %}
+                        <div class="row g-3">
+                            {% for insight in insights %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="insight-card h-100 alert alert-{{ insight.tipo }} border-0 shadow-sm" role="alert">
+                                        <div class="d-flex align-items-start">
+                                            <div class="insight-icon me-3">
+                                                <i class="{{ insight.icone }} fa-2x"></i>
+                                            </div>
+                                            <div class="insight-content flex-grow-1">
+                                                <h6 class="alert-heading mb-2">{{ insight.titulo }}</h6>
+                                                <p class="mb-0 small">{{ insight.mensagem }}</p>
                                             </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">Todos os indicadores estão dentro dos parâmetros normais.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Os insights são gerados automaticamente com base nos dados atuais do sistema
+                        </small>
+                        <a href="{{ url_for('dashboard_financeiro') }}" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-chart-line me-1"></i>
+                            Ver Dashboard Financeiro
+                        </a>
                     </div>
-
-                    <!-- SSD -->
-                    <h6 class="text-muted mb-2">Distribuição de SSD</h6>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>SSD (GB)</th>
-                                    <th>Quantidade</th>
-                                    <th>Porcentagem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ssd in distribuicao_ssd %}
-                                <tr>
-                                    <td>{{ ssd.tamanho }} GB</td>
-                                    <td>{{ ssd.quantidade }}</td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ ssd.porcentagem }}%;" aria-valuenow="{{ ssd.porcentagem }}" aria-valuemin="0" aria-valuemax="100">
-                                                {{ "%.1f"|format(ssd.porcentagem) }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Indicadores de Performance -->
+    <div class="row g-3 mt-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tachometer-alt text-warning me-2"></i>
+                        Indicadores de Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Indicador de RAM -->
+                        <div class="col-md-4">
+                            <div class="performance-indicator">
+                                <h6 class="text-muted mb-3">Capacidade de RAM</h6>
+                                <div class="progress mb-2" style="height: 25px;">
+                                    {% set ram_score = ((media_ram / 16) * 100) | round %}
+                                    <div class="progress-bar bg-{{ 'danger' if ram_score < 40 else 'warning' if ram_score < 70 else 'success' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ ram_score }}%;">
+                                        {{ media_ram }} GB
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    Meta recomendada: 16GB para alta performance
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador de SSD -->
+                        <div class="col-md-4">
+                            <div class="performance-indicator">
+                                <h6 class="text-muted mb-3">Capacidade de Armazenamento</h6>
+                                <div class="progress mb-2" style="height: 25px;">
+                                    {% set ssd_score = ((media_ssd / 512) * 100) | round %}
+                                    <div class="progress-bar bg-{{ 'danger' if ssd_score < 40 else 'warning' if ssd_score < 70 else 'success' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ ssd_score }}%;">
+                                        {{ media_ssd }} GB
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    Meta recomendada: 512GB para conforto
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador de Distribuição -->
+                        <div class="col-md-4">
+                            <div class="performance-indicator">
+                                <h6 class="text-muted mb-3">Distribuição por Departamento</h6>
+                                <div class="progress mb-2" style="height: 25px;">
+                                    {% set dist_score = 100 - ((departamentos[0].porcentagem if departamentos else 0) - (100 / total_departamentos)) | abs %}
+                                    <div class="progress-bar bg-{{ 'danger' if dist_score < 60 else 'warning' if dist_score < 80 else 'success' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ dist_score }}%;">
+                                        {{ dist_score | round }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    Quanto mais equilibrada, melhor a distribuição
+                                </small>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 2px solid transparent;
+        background: none;
+        padding: 0.5rem 1rem;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #FEA30B;
+        border-bottom-color: #FEA30B;
+        background: none;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: #FEA30B;
+    }
+    
+    .color-indicator {
+        flex-shrink: 0;
+    }
+    
+    .department-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .resource-item {
+        padding: 0.5rem 0;
+    }
+    
+    .progress {
+        background-color: #f8f9fa;
+    }
+    
+    .chart-container {
+        margin: 0 auto;
+    }
+    
+    /* Estilos para insights */
+    .insight-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        min-height: 120px;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+    
+    /* Garantir que os alerts não desapareçam */
+    .insight-card.alert {
+        animation: none !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+    
+    .insight-card.fade {
+        opacity: 1 !important;
+    }
+    
+    .insight-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .insight-icon {
+        opacity: 0.8;
+    }
+    
+    .alert-danger {
+        background-color: #fee;
+        color: #721c24;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    /* Indicadores de performance */
+    .performance-indicator {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        height: 100%;
+    }
+    
+    .progress {
+        overflow: visible;
+    }
+    
+    .progress-bar {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Garantir que insights permaneçam visíveis
+    const insights = document.querySelectorAll('.insight-card');
+    insights.forEach(insight => {
+        insight.classList.remove('fade', 'show');
+        insight.style.opacity = '1';
+        insight.style.visibility = 'visible';
+    });
+    
+    // Dados para os gráficos
+    const departamentoData = {
+        labels: [{% for dept in departamentos %}"{{ dept.nome }}"{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for dept in departamentos %}{{ dept.quantidade }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: [
+                '#FEA30B', '#FFC107', '#FF9800', '#FF6B6B', 
+                '#4ECDC4', '#45B7D1', '#96CEB4', '#DDA0DD'
+            ],
+            borderWidth: 0
+        }]
+    };
+
+    const ramData = {
+        labels: [{% for ram in distribuicao_ram %}"{{ ram.tamanho }}GB"{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Quantidade',
+            data: [{% for ram in distribuicao_ram %}{{ ram.quantidade }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: '#FEA30B',
+            borderRadius: 8
+        }]
+    };
+
+    const ssdData = {
+        labels: [{% for ssd in distribuicao_ssd %}"{{ ssd.tamanho }}GB"{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Quantidade',
+            data: [{% for ssd in distribuicao_ssd %}{{ ssd.quantidade }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: '#dc3545',
+            borderRadius: 8
+        }]
+    };
+
+    // Configurações comuns
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    };
+
+    // Gráfico de Pizza - Departamentos
+    new Chart(document.getElementById('departamentoChart'), {
+        type: 'doughnut',
+        data: departamentoData,
+        options: {
+            ...commonOptions,
+            cutout: '60%',
+            plugins: {
+                ...commonOptions.plugins,
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Barras - RAM
+    new Chart(document.getElementById('ramChart'), {
+        type: 'bar',
+        data: ramData,
+        options: {
+            ...commonOptions,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Barras - SSD
+    new Chart(document.getElementById('ssdChart'), {
+        type: 'bar',
+        data: ssdData,
+        options: {
+            ...commonOptions,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Função para exportar PDF (placeholder)
+function exportarPDF() {
+    alert('Funcionalidade de exportação PDF será implementada em breve!');
+}
+</script>
 {% endblock %}
