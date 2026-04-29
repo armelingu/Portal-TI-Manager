@@ -147,7 +147,7 @@ class Registro(db.Model):
     nome = db.Column(db.String(100), nullable=False, index=True)
     departamento = db.Column(db.String(100), nullable=False, index=True)
     tipo_dispositivo = db.Column(db.String(50), nullable=False, index=True) #tipo de dispositivo
-    endereco_ip = db.Column(db.String(20), nullable=False, unique=True, index=True)
+    endereco_ip = db.Column(db.String(20), nullable=True, unique=True, index=True)
     mac_adress = db.Column(db.String(20), nullable=False, unique=True, index=True)
     hostname = db.Column(db.String(100), nullable=False, index=True)
     serial_number = db.Column(db.String(50), nullable=True, index=True) #serial number da máquina - campo desabilitado
@@ -440,6 +440,8 @@ def validate_serial_existente(form, field):
         raise ValidationError('Este Serial Number já está em uso.')
 
 def validate_ip_existente(form, field):
+    if not field.data:
+        return
     registro_id = form.id if hasattr(form, 'id') else None
     if Registro.query.filter(Registro.endereco_ip == field.data, Registro.id != registro_id).first():
         raise ValidationError('Este endereço IP já está em uso.')
@@ -489,7 +491,7 @@ class MaquinaForm(FlaskForm):
         ('nao', 'Não')
     ])
     endereco_ip = StringField('Endereço IP', validators=[
-        DataRequired(message="Endereço IP é obrigatório"),
+        Optional(),
         IPAddress(message="Endereço IP inválido"),
         validate_ip_existente
     ])
