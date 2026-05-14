@@ -1,13 +1,47 @@
-instance/
-__pycache__/
-*.pyc
-*.env
-*.log
-banco_de_dados.db
-zip
-logs/
+# ── Ambiente Python ──────────────────────────────────────────────
 venv/
-__pycache__/
-public/screenshots/
-instance/
 env/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Flask / SQLAlchemy ───────────────────────────────────────────
+instance/
+banco_de_dados.db
+*.db
+*.sqlite3
+
+# ── Variáveis de ambiente ────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ─────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Upload / arquivos gerados ────────────────────────────────────
+static/uploads/
+public/screenshots/
+
+# ── Compactados ──────────────────────────────────────────────────
+*.zip
+*.tar.gz
+*.rar
+
+# ── Editores / IDEs ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Sistema operacional ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
