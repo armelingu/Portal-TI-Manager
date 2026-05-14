@@ -26,6 +26,11 @@ banco_de_dados.db
 logs/
 *.log
 
+# ── Dumps de banco ───────────────────────────────────────────────
+backups/
+*.sql
+*.sql.gz
+
 # ── Upload / arquivos gerados ────────────────────────────────────
 static/uploads/
 public/screenshots/
